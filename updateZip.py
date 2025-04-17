@@ -4,12 +4,15 @@ import subprocess
 import time
 import psutil
 
+#Update all paths to the ones you work with. 
+#Each line will have a comment "UPDATE".
+
 # Paths
-repo_path = r"C:\Users\User\OneDrive\Desktop\code\github\woody"
+repo_path = r"C:\Users\User\OneDrive\Desktop\code\github\woody"  #UPDATE path to the location of your cloned repo
 zip_name = "woody.zip"
 zip_path = os.path.join(repo_path, zip_name)
 int_file = os.path.join(repo_path, "__int__.py")
-blender_exe = r"C:\Users\User\OneDrive\Desktop\3d\blender-4.2.5-windows-x64\blender.exe"
+blender_exe = r"C:\Users\User\OneDrive\Desktop\3d\blender-4.2.5-windows-x64\blender.exe" #UPDATE path to the location of your blender.exe
 
 addon_module_name = "woody"  # Name used to register the addon
 addon_zip_path = zip_path.replace("\\", "/")  # Use forward slashes for Blender compatibility
@@ -69,8 +72,8 @@ bpy.ops.preferences.addon_enable(module=addon_name)
 
 # Set preferences
 prefs = bpy.context.preferences.addons[addon_name].preferences
-prefs.directory  = r"\\\\100.113.50.90\\projects\\PUD\\dev\\project"
-prefs.blenderVersion  = r"C:\\Users\\User\\OneDrive\\Desktop\\3d\\blender-4.2.5-windows-x64\\blender.exe"
+prefs.directory  = r"\\\\100.113.50.90\\projects\\PUD\\dev\\project" #UPDATE to location of project you are working on.
+prefs.blenderVersion  = r"C:\\Users\\User\\OneDrive\\Desktop\\3d\\blender-4.2.5-windows-x64\\blender.exe" #UPDATE path to the location of your blender.exe
 
 # Save preferences
 bpy.ops.wm.save_userpref()

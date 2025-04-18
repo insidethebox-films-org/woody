@@ -1,5 +1,6 @@
 import os
 import zipfile
+from pathlib import Path
 import subprocess
 import time
 import psutil
@@ -37,8 +38,12 @@ def delete_zip():
 def create_zip():
     """Create woody.zip from __init__.py."""
     print("Creating new zip file...")
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
-        zf.write(int_file, arcname="__int__.py")
+    addon_folder = Path(repo_path) / "woody"
+
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as z:
+        for file in addon_folder.rglob("*"):
+            z.write(file, file.relative_to(addon_folder.parent))
+
     print("Zip file created.")
 
 def install_addon():
@@ -91,4 +96,5 @@ if __name__ == "__main__":
     time.sleep(2)  # Wait for Blender to fully shut down
     delete_zip()
     create_zip()
+    install_addon()
     launch_blender()

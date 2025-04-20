@@ -18,6 +18,12 @@ import json
 from pathlib import Path
 
 #===============
+# Global Variables
+#===============
+
+_json_cache = None  # Global cache
+
+#===============
 # Functions
 #===============
 
@@ -37,19 +43,27 @@ def create_folders_subfolders(folders, base_path):
 # Create enums based on json
 
 def load_json_data(context):
-    scene = context.scene
-    my_props = scene.woody
+    global _json_cache
+    if _json_cache is None:
+        print("================= Loading new JSON data... =================")
+        scene = context.scene
+        my_props = scene.woody
 
-    directory = get_directory()
+        directory = get_directory()
 
-    base_path = Path(bpy.path.abspath(directory))
-    json_file = base_path / "projStruc.json"
+        base_path = Path(bpy.path.abspath(directory))
+        json_file = base_path / "projStruc.json"
 
-    if not json_file.exists():
-        return {}
+        if not json_file.exists():
+            print("ERROR: JSON file not exist.")
+            return {}
 
-    with open(json_file, "r", encoding="utf-8") as file:
-        return json.load(file)
+        with open(json_file, "r", encoding="utf-8") as file:
+            _json_cache = json.load(file)
+        print("================= CACHE LOADED =================")
+        return _json_cache
+    print("Using cached JSON.")
+    return _json_cache
 
 def get_root_folders(self, context):
     data = load_json_data(context)
@@ -128,6 +142,9 @@ def save_structure_to_json(base_path):
         json.dump(folder_structure, json_file, indent=4)
 
     print(f"Folder structure saved to: {output_file}")
+
+    global _json_cache
+    _json_cache = None
 
 # .blend functions
 

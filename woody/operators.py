@@ -264,7 +264,7 @@ class PIPE_OT_version_up(bpy.types.Operator):
 
         return {"FINISHED"}
 
-class PIPE_OT_publish_prep(bpy.types.Operator):
+class PIPE_OT_publish_prep(bpy.types.Operator): # DEPRECATED
     bl_idname = "pipe.publish_prep"
     bl_label = "Publish Asset"
 
@@ -304,7 +304,7 @@ class PIPE_OT_publish_prep(bpy.types.Operator):
 
         return {"FINISHED"}
 
-class PIPE_OT_create_publish_workspace(bpy.types.Operator):
+class PIPE_OT_create_publish_workspace(bpy.types.Operator):  # DEPRECATED
     bl_idname = "pipe.create_publish_workspace"
     bl_label = "Publish Asset"
 
@@ -315,7 +315,7 @@ class PIPE_OT_create_publish_workspace(bpy.types.Operator):
 
         return {"FINISHED"}
 
-class PIPE_OT_publish(bpy.types.Operator):
+class PIPE_OT_publish(bpy.types.Operator):  # DEPRECATED
 
     bl_idname = "pipe.publish_asset"
     bl_label = "Publish Asset"
@@ -344,5 +344,264 @@ class PIPE_FVpublish(bpy.types.Operator):
     bl_idname = "pipe.fv_publish"
     bl_label = "FV Publish"
     def execute(self, context):
+
+        directory = get_directory()
+        directory = Path(directory)
+
+        print("DIRECTORY:  ",directory)
+
+        root, group, asset, type_ = context_names()
+        collection_name = root + "_" + group + "_" + asset + "_" + type_
+        tags = [root, group, asset, type_]
+
+        collection = bpy.data.collections.get(collection_name)
+
+        filePath = directory / root / group / asset / "_publish" 
+        print("FILEPATH: ", filePath)
+
+        #export_dir = directory / "_publish"
+        export_filename = asset + "_published" + ".blend"
+        export_path = filePath / export_filename
+
+        print("EXPRTPATH: ", export_path)
+        create_blend_with_collection_FV(export_filename, collection_name, filePath)
+
         return {"FINISHED"}
 
+def get_blend_items(self, context):
+    base_dir = get_directory()
+    items = []
+
+    if not base_dir:
+        return [("NONE", "No directory", "")]
+
+    for root, dirs, files in os.walk(base_dir):
+        for file in files:
+            if file.endswith("_published.blend"):
+                full_path = os.path.join(root, file)
+                rel_path = os.path.relpath(full_path, base_dir)
+                # Unique identifier, label, tooltip
+                items.append((full_path, rel_path, "Link this file"))
+
+    if not items:
+        return [("NONE", "No published files found", "")]
+    return items
+
+def find_layer_collection(layer_collection, target_collection):
+    """Recursively search for a LayerCollection matching the target collection"""
+    if layer_collection.collection == target_collection:
+        return layer_collection
+    for child in layer_collection.children:
+        result = find_layer_collection(child, target_collection)
+        if result:
+            return result
+    return None
+class PIPE_FVopenPublish(bpy.types.Operator):
+    bl_idname = "pipe.fv_openpublish"
+    bl_label = "FV Open Publish"
+    bl_description = "Link the first collection from a published .blend file into the current scene"
+
+    filepath: bpy.props.StringProperty()
+
+    def execute(self, context):
+        blend_path = self.filepath
+
+        if not Path(blend_path).exists():
+            self.report({'ERROR'}, f"File not found: {blend_path}")
+            return {'CANCELLED'}
+
+        try:
+            with bpy.data.libraries.load(blend_path, link=True) as (data_from, data_to):
+                if not data_from.collections:
+                    self.report({'ERROR'}, "No collections found in this .blend file.")
+                    return {'CANCELLED'}
+
+                # Link the first collection
+                collection_name = data_from.collections[0]
+                data_to.collections = [collection_name]
+
+            linked_col = data_to.collections[0]
+            context.scene.collection.children.link(linked_col)
+
+            self.report({'INFO'}, f"✅ Linked collection: {collection_name}")
+            return {'FINISHED'}
+
+        except Exception as e:
+            self.report({'ERROR'}, f"Linking failed: {e}")
+            return {'CANCELLED'}
+
+class PIPE_FVClearEnum(bpy.types.Operator):
+    bl_idname = "pipe.clear_enum"
+    bl_label = "Clear Selection"
+    bl_description = "Reset this field to 'None'"
+
+    prop_name: bpy.props.StringProperty()
+
+    def execute(self, context):
+        setattr(context.scene.woody, self.prop_name, "NONE")
+        return {'FINISHED'}
+
+#LATEST GOOD 
+# class PIPE_FVoverride_collection(bpy.types.Operator):
+#     bl_idname = "pipe.override_collection"
+#     bl_label = "Override Linked Collection"
+#     bl_description = "Make a library override for this linked collection"
+
+#     collection_name: bpy.props.StringProperty()
+
+#     def execute(self, context):
+#         collection = bpy.data.collections.get(self.collection_name)
+#         if not collection:
+#             self.report({'ERROR'}, f"Collection '{self.collection_name}' not found.")
+#             return {'CANCELLED'}
+
+#         # Find the Outliner area and override the context
+#         for area in context.window.screen.areas:
+#             if area.type == 'OUTLINER':
+#                 for region in area.regions:
+#                     if region.type == 'WINDOW':
+#                         override = {
+#                             'window': context.window,
+#                             'screen': context.screen,
+#                             'area': area,
+#                             'region': region,
+#                             'scene': context.scene,
+#                             'id': collection,
+#                             'space_data': area.spaces.active,
+#                         }
+
+#                         try:
+#                             bpy.ops.outliner.collection_library_override_create(override)
+#                             self.report({'INFO'}, f"Overridden: {collection.name}")
+#                             return {'FINISHED'}
+#                         except Exception as e:
+#                             self.report({'ERROR'}, f"Override failed: {e}")
+#                             return {'CANCELLED'}
+
+#         self.report({'ERROR'}, "No Outliner area found.")
+#         return {'CANCELLED'}
+
+
+# class PIPE_FVoverride_collection(bpy.types.Operator):
+#     bl_idname = "pipe.override_collection"
+#     bl_label = "Override Linked Collection"
+#     bl_description = "Create a full library override (content) for the specified linked collection"
+
+#     collection_name: bpy.props.StringProperty()
+
+#     def execute(self, context):
+#         collection = bpy.data.collections.get(self.collection_name)
+#         if not collection:
+#             self.report({'ERROR'}, f"Collection '{self.collection_name}' not found.")
+#             return {'CANCELLED'}
+
+#         # Check if it's already overridden
+#         if collection.override_library:
+#             self.report({'INFO'}, f"Collection '{collection.name}' is already overridden.")
+#             return {'CANCELLED'}
+
+#         # Prepare the root object to override (we need an instance in the scene)
+#         for obj in context.scene.objects:
+#             if obj.instance_type == 'COLLECTION' and obj.instance_collection == collection:
+#                 try:
+#                     override = bpy.data.override_library_create(
+#                         reference=obj,
+#                         context=context,
+#                         library=bpy.data.libraries[collection.library.name],
+#                         do_hierarchy=True
+#                     )
+#                     self.report({'INFO'}, f"Created override: {override.name}")
+#                     return {'FINISHED'}
+#                 except Exception as e:
+#                     self.report({'ERROR'}, f"Override failed: {e}")
+#                     return {'CANCELLED'}
+
+#         # No existing instance object found, so create one
+#         try:
+#             instance_obj = bpy.data.objects.new(name=f"{collection.name}_instance", object_data=None)
+#             instance_obj.instance_type = 'COLLECTION'
+#             instance_obj.instance_collection = collection
+#             context.scene.collection.objects.link(instance_obj)
+
+#             override = bpy.data.override_library_create(
+#                 reference=instance_obj,
+#                 context=context,
+#                 library=bpy.data.libraries[collection.library.name],
+#                 do_hierarchy=True
+#             )
+#             self.report({'INFO'}, f"Instancer created and overridden: {override.name}")
+#             return {'FINISHED'}
+#         except Exception as e:
+#             self.report({'ERROR'}, f"Failed to create override: {e}")
+#             return {'CANCELLED'}
+
+class PIPE_FVoverride_collection(bpy.types.Operator):
+    bl_idname = "pipe.override_collection"
+    bl_label = "Override Linked Collection"
+    bl_description = "Create a full library override (content) for the specified linked collection"
+
+    collection_name: bpy.props.StringProperty()
+
+    def execute(self, context):
+        col = bpy.data.collections.get(self.collection_name)
+        if not col:
+            self.report({'ERROR'}, f"Collection '{self.collection_name}' not found.")
+            return {'CANCELLED'}
+
+        if col.override_library:
+            self.report({'INFO'}, f"Collection '{col.name}' is already overridden.")
+            return {'CANCELLED'}
+
+        try:
+            override = col.override_hierarchy_create(
+                scene=context.scene,
+                view_layer=context.view_layer,
+                do_fully_editable=True
+            )
+
+            # Attempt to unlink original linked collection from scene
+            children = context.scene.collection.children
+            for child in children:
+                if child.name == col.name:
+                    children.unlink(child)
+                    self.report({'INFO'}, f"Unlinked original linked collection: {child.name}")
+                    break
+
+            self.report({'INFO'}, f"Full override created for: {override.name}")
+            return {'FINISHED'}
+
+        except Exception as e:
+            self.report({'ERROR'}, f"Override failed: {e}")
+            return {'CANCELLED'}
+
+
+        
+# class PIPE_FVoverride_collection(bpy.types.Operator):
+#     bl_idname = "pipe.override_collection"
+#     bl_label = "Override Linked Collection"
+#     bl_description = "Make a library override for this linked collection"
+
+#     collection_name: bpy.props.StringProperty()
+
+#     def execute(self, context):
+#         collection = bpy.data.collections.get(self.collection_name)
+#         if not collection:
+#             self.report({'ERROR'}, f"Collection '{self.collection_name}' not found.")
+#             return {'CANCELLED'}
+
+#         # Find an object instancing this collection
+#         for obj in bpy.data.objects:
+#             if obj.instance_type == 'COLLECTION' and obj.instance_collection == collection:
+#                 # Select and activate this object
+#                 bpy.ops.object.select_all(action='DESELECT')
+#                 obj.select_set(True)
+#                 context.view_layer.objects.active = obj
+
+#                 # Perform the override
+#                 bpy.ops.object.make_override_library()
+#                 self.report({'INFO'}, f"Overridden: {collection.name}")
+#                 return {'FINISHED'}
+
+#         self.report({'WARNING'}, f"No instancing object found for '{collection.name}'")
+#         return {'CANCELLED'}
+    

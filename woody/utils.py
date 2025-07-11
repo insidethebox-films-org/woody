@@ -9,7 +9,7 @@ from pathlib import Path
 
 from .preferences import *
 
-def publish(collection_name, tags):
+def publish(collection_name, tags): # DEPRECATED
     # Make sure there is a valid active collection
     active_collection = bpy.context.view_layer.active_layer_collection.collection
 
@@ -51,7 +51,7 @@ def publish(collection_name, tags):
     except RuntimeError as e:
         print(f"❌ Failed to generate preview: {e}")
 
-def create_blend_with_collection(file_name, collection_name, target_directory):
+def create_blend_with_collection(file_name, collection_name, target_directory): # DEPRECATED
 
     blender_exe = get_blender_version()
 
@@ -97,6 +97,43 @@ def create_blend_with_collection(file_name, collection_name, target_directory):
     else:
         print(f"❌ Error: The .blend file was not created at {file_path}")
 
+def create_blend_with_collection_FV(file_name, collection_name, target_directory): 
+    from pathlib import Path
+    import bpy
+    import os
+
+    # Ensure the target directory exists
+    target_dir = Path(target_directory)
+    os.makedirs(target_dir, exist_ok=True)
+
+    file_path = target_dir / file_name
+    file_path_str = str(file_path)
+
+    collection = bpy.data.collections.get(collection_name)
+    if not collection:
+        print(f"❌ Collection '{collection_name}' not found in current file.")
+        return
+
+    # Get all objects inside the collection
+    #objects = {obj for obj in collection.all_objects}
+
+    # Optionally gather mesh, materials, etc.
+   # meshes = {obj.data for obj in objects if obj.type == 'MESH' and obj.data}
+    #materials = {mat for obj in objects if obj.type == 'MESH' for mat in obj.data.materials if mat}
+    
+    datablocks = {collection} #| objects | meshes | materials
+
+    try:
+        bpy.data.libraries.write(
+            file_path_str,
+            datablocks,
+            fake_user=True,
+            compress=True
+        )
+        #print(f"✅ Exported: '{collection_name}' with {len(objects)} object(s), {len(meshes)} mesh(es), {len(materials)} material(s)")
+    except Exception as e:
+        print(f"❌ Failed to export collection: {e}")
+
 def open_publish_blend_file(file_path):
 
     blender_exe = get_blender_version()
@@ -109,7 +146,7 @@ def open_publish_blend_file(file_path):
 
     print(f"✅ Opened Blender in a separate instance with file: {file_path}")
 
-def select_objects_in_selected_collection(collection_name):
+def select_objects_in_selected_collection(collection_name): # DEPRECATED
 
     # Deselect all objects first
     bpy.ops.object.select_all(action='DESELECT')
@@ -128,7 +165,7 @@ def select_objects_in_selected_collection(collection_name):
     # Output the result
     print(f"✅ Selected all objects in the collection: {collection_name}")
 
-def export_selection_to_usd(export_path, export_format='USD'):
+def export_selection_to_usd(export_path, export_format='USD'): # DEPRECATED
 
     if not bpy.context.selected_objects:
         print("❌ Error: No objects selected for export.")
@@ -162,7 +199,7 @@ def export_selection_to_usd(export_path, export_format='USD'):
 
     print(f"✅ Successfully exported selection to: {export_path}")
 
-def create_publish_workspace(workspace_name="My Custom Workspace"):
+def create_publish_workspace(workspace_name="My Custom Workspace"): # DEPRECATED
 
     if workspace_name in bpy.data.workspaces:
         workspace = bpy.data.workspaces[workspace_name]
@@ -210,7 +247,7 @@ def create_publish_workspace(workspace_name="My Custom Workspace"):
 
     print(f"✅ Workspace '{workspace_name}' created successfully!")
 
-def rename_workspace(old_name, new_name):
+def rename_workspace(old_name, new_name): # DEPRECATED
 
     if old_name in bpy.data.workspaces:
         bpy.data.workspaces[old_name].name = new_name
@@ -218,7 +255,7 @@ def rename_workspace(old_name, new_name):
     else:
         print(f"✅ Workspace '{old_name}' not found!")
 
-def delete_collection_contents(collection_name):
+def delete_collection_contents(collection_name): # DEPRECATED
 
     # Get the collection
     collection = bpy.data.collections.get(collection_name)
@@ -241,7 +278,7 @@ def delete_collection_contents(collection_name):
 
     print("✅ Cleaned up orphan data.")
 
-def import_usdc_to_collection(file_path, collection_name):
+def import_usdc_to_collection(file_path, collection_name): # DEPRECATED
 
     # Ensure the file exists
     if not os.path.isfile(file_path):

@@ -45,3 +45,5 @@ def add_to_catalog_file(collection_name, file_path):
     except Exception as e:
         print(f"❌ An error occurred: {e}")
         return None
+
+# ALL DEPRECATED

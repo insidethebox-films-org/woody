@@ -72,17 +72,8 @@ class VIEW3D_PT_assets_shots(bpy.types.Panel):
         publishBox.label(text="Publish")
         publishBox.scale_y = 0.65
         
-        # DEPRECATED =============================
         row1 = layout.row()
-        row1.operator("pipe.publish_prep", text="Publish Prep", icon="SURFACE_NSPHERE")
-        row1.operator("pipe.create_publish_workspace", text="Workspace", icon="WINDOW")
-
-        layout.operator("pipe.publish_asset", text="Publish", icon="DISK_DRIVE")
-
-        row2 = layout.row()
-        row2.operator("pipe.fv_publish", text="FV_Publish", icon="DISK_DRIVE")
-        row2.operator("pipe.fv_openpublish", text="FV_OpenPublish", icon="DISK_DRIVE")
-         #===============================================
+        row1.operator("pipe.publish", text="Publish", icon="DISK_DRIVE")
         
 # Publish Asset Browser
 
@@ -167,7 +158,7 @@ class VIEW3D_PT_publish_browser(bpy.types.Panel):
 
                 # Check if already linked or overridden
                 if not is_published_file_already_in_scene(blend_path_str):
-                    op = row.operator("pipe.fv_openpublish", text="", icon="IMPORT")
+                    op = row.operator("pipe.open_publish", text="", icon="IMPORT")
                     op.filepath = blend_path_str
                 else:
                     row.label(icon="CHECKMARK")

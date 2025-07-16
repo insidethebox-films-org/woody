@@ -11,7 +11,6 @@ from .utils import *
 from .folders import *
 from .blend_functions import *
 from .context import *
-from .catalogs import *
 
 class PIPE_OT_create_project(bpy.types.Operator):
     # Creates a new project with the correct folder structure in the base project directory
@@ -264,85 +263,151 @@ class PIPE_OT_version_up(bpy.types.Operator):
 
         return {"FINISHED"}
 
-class PIPE_OT_publish_prep(bpy.types.Operator):
-    bl_idname = "pipe.publish_prep"
-    bl_label = "Publish Asset"
+class PIPE_OT_publish(bpy.types.Operator):
+    bl_idname = "pipe.publish"
+    bl_label = "Publish"
+    bl_description = "Publish the current asset to a dedicated file"
 
+    def invoke(self, context, event):
+        # This opens a Blender-native confirmation popup
+        return context.window_manager.invoke_confirm(self, event)
+    
     def execute(self, context):
-        
+
         directory = get_directory()
         directory = Path(directory)
+
+        print("DIRECTORY:  ",directory)
 
         root, group, asset, type_ = context_names()
         collection_name = root + "_" + group + "_" + asset + "_" + type_
         tags = [root, group, asset, type_]
 
-        file_path = Path(directory) / "_publish" / "blender_assets.cats.txt"
-        add_to_catalog_file(collection_name, file_path)
+        collection = bpy.data.collections.get(collection_name)
 
-        publish(collection_name, tags)
+        filePath = directory / root / group / asset / "_publish" 
+        print("FILEPATH: ", filePath)
 
-        export_dir = directory / "_publish" / "blends"
-        export_filename = collection_name + ".blend"
-        export_path = export_dir / export_filename
+        #export_dir = directory / "_publish"
+        export_filename = asset + "_published" + ".blend"
+        export_path = filePath / export_filename
 
-        create_blend_with_collection(export_filename, collection_name, export_dir)
+        print("EXPRTPATH: ", export_path)
+        create_blend_with_collection(export_filename, collection_name, filePath)
+
+        # Feedback (status bar + popup)
+        self.report({'INFO'}, f"✅ Published to: {export_filename}")
+        show_popup_message("✅ Asset has been published!", title="Publish Complete", icon='CHECKMARK')
         
-        open_publish_blend_file(export_path)
-
-        select_objects_in_selected_collection(collection_name)
-
-        export_geo_dir = directory / "_publish" / "geo" / collection_name
-        export_file = collection_name + ".usdc"
-        export_geo_path = export_geo_dir / export_file
-
-        export_selection_to_usd(str(export_geo_path), export_format="USDC")
-
-        save_current_scene()
-
-        restart_blend_file()
-
         return {"FINISHED"}
 
-class PIPE_OT_create_publish_workspace(bpy.types.Operator):
-    bl_idname = "pipe.create_publish_workspace"
-    bl_label = "Publish Asset"
+from pathlib import Path
+
+class PIPE_OT_open_publish(bpy.types.Operator):
+    bl_idname = "pipe.open_publish"
+    bl_label = "Open Publish"
+    bl_description = "Link the first collection from a published .blend file into the current scene"
+
+    filepath: bpy.props.StringProperty()
 
     def execute(self, context):
+        blend_path = Path(self.filepath).resolve()
+        current_path = Path(bpy.data.filepath).resolve()
 
-        create_publish_workspace("Layout")
-        rename_workspace("Layout", "Publish")
+        # Extract root/group/asset from both paths
+        try:
+            def extract_asset_path_parts(path):
+                # Example: /project/assets/Root/Group/Asset/_publish/asset_published.blend
+                parts = path.parts
+                if len(parts) < 5:
+                    return None
+                # Grab asset, group, root in reverse order
+                asset = parts[-3]
+                group = parts[-4]
+                root = parts[-5]
+                return (root, group, asset)
 
-        return {"FINISHED"}
+            current_parts = extract_asset_path_parts(current_path)
+            target_parts = extract_asset_path_parts(blend_path)
 
-class PIPE_OT_publish(bpy.types.Operator):
+            if current_parts and target_parts and current_parts == target_parts:
+                self.report({'ERROR'}, "❌ Cannot link from the same asset you're currently working in.")
+                return {'CANCELLED'}
 
-    bl_idname = "pipe.publish_asset"
-    bl_label = "Publish Asset"
+        except Exception as e:
+            self.report({'WARNING'}, f"⚠️ Asset path check failed: {e}")
+            # Allow linking if check fails
+
+        if not blend_path.exists():
+            self.report({'ERROR'}, f"File not found: {blend_path}")
+            return {'CANCELLED'}
+
+        try:
+            with bpy.data.libraries.load(str(blend_path), link=True) as (data_from, data_to):
+                if not data_from.collections:
+                    self.report({'ERROR'}, "No collections found in this .blend file.")
+                    return {'CANCELLED'}
+
+                collection_name = data_from.collections[0]
+                data_to.collections = [collection_name]
+
+            linked_col = data_to.collections[0]
+            context.scene.collection.children.link(linked_col)
+
+            self.report({'INFO'}, f"✅ Linked collection: {collection_name}")
+            return {'FINISHED'}
+
+        except Exception as e:
+            self.report({'ERROR'}, f"Linking failed: {e}")
+            return {'CANCELLED'}
+
+class PIPE_OT_clear_enum(bpy.types.Operator):
+    bl_idname = "pipe.clear_enum"
+    bl_label = "Clear Selection"
+    bl_description = "Reset this field to 'None'"
+
+    prop_name: bpy.props.StringProperty()
 
     def execute(self, context):
+        setattr(context.scene.woody, self.prop_name, "NONE")
+        return {'FINISHED'}
 
-        directory = get_directory()
-        directory = Path(directory)
+class PIPE_OT_override_collection(bpy.types.Operator):
+    bl_idname = "pipe.override_collection"
+    bl_label = "Override Linked Collection"
+    bl_description = "Create a full library override (content) for the specified linked collection"
 
-        file_path = bpy.data.filepath
-        file_name = os.path.basename(file_path)
-        file_name = file_name.replace(".blend", "")
+    collection_name: bpy.props.StringProperty()
 
-        collection_name = file_name
+    def execute(self, context):
+        col = bpy.data.collections.get(self.collection_name)
+        if not col:
+            self.report({'ERROR'}, f"Collection '{self.collection_name}' not found.")
+            return {'CANCELLED'}
+
+        if col.override_library:
+            self.report({'INFO'}, f"Collection '{col.name}' is already overridden.")
+            return {'CANCELLED'}
+
+        try:
+            override = col.override_hierarchy_create(
+                scene=context.scene,
+                view_layer=context.view_layer,
+                do_fully_editable=True
+            )
+
+            # Attempt to unlink original linked collection from scene
+            children = context.scene.collection.children
+            for child in children:
+                if child.name == col.name:
+                    children.unlink(child)
+                    self.report({'INFO'}, f"Unlinked original linked collection: {child.name}")
+                    break
+
+            self.report({'INFO'}, f"Full override created for: {override.name}")
+            return {'FINISHED'}
+
+        except Exception as e:
+            self.report({'ERROR'}, f"Override failed: {e}")
+            return {'CANCELLED'}
         
-        import_geo_dir = directory / "_publish" / "geo" / collection_name
-        import_file = collection_name + ".usdc"
-        import_geo_path = os.path.join(import_geo_dir, import_file)
-
-        delete_collection_contents(collection_name)
-        import_usdc_to_collection(import_geo_path, collection_name)
-
-        return {"FINISHED"}
-
-class PIPE_FVpublish(bpy.types.Operator):
-    bl_idname = "pipe.fv_publish"
-    bl_label = "FV Publish"
-    def execute(self, context):
-        return {"FINISHED"}
-

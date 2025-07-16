@@ -19,8 +19,8 @@ from pathlib import Path
 
 from .properties import MyProperties
 from .preferences import Preferences
-from .operators import PIPE_OT_create_project, PIPE_OT_create_group, PIPE_OT_create_asset, PIPE_OT_create_shot, PIPE_OT_open_asset, PIPE_OT_version_up, PIPE_OT_publish, PIPE_OT_publish_prep, PIPE_OT_create_publish_workspace, PIPE_FVpublish
-from .panels import VIEW3D_PT_context, VIEW3D_PT_assets_shots
+from .operators import PIPE_OT_create_project, PIPE_OT_create_group, PIPE_OT_create_asset, PIPE_OT_create_shot, PIPE_OT_open_asset, PIPE_OT_version_up, PIPE_OT_publish, PIPE_OT_open_publish, PIPE_OT_clear_enum, PIPE_OT_override_collection
+from .panels import VIEW3D_PT_context, VIEW3D_PT_assets_shots, VIEW3D_PT_publish_browser
 
 ADDON_NAME = __name__
 
@@ -37,12 +37,13 @@ classes = [
     PIPE_OT_open_asset,
     PIPE_OT_version_up,
     PIPE_OT_publish,
-    PIPE_OT_publish_prep,
-    PIPE_OT_create_publish_workspace,
-    PIPE_FVpublish,
+    PIPE_OT_open_publish,
+    PIPE_OT_clear_enum,
+    PIPE_OT_override_collection,
     Preferences,
     VIEW3D_PT_context,
-    VIEW3D_PT_assets_shots
+    VIEW3D_PT_assets_shots,
+    VIEW3D_PT_publish_browser
 ]
 
 def register():

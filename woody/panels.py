@@ -75,6 +75,8 @@ class VIEW3D_PT_assets_shots(bpy.types.Panel):
         row1 = layout.row()
         row1.operator("pipe.publish", text="Publish", icon="DISK_DRIVE")
         
+        layout.separator()
+        layout.operator("pipe.set_output_cg", text="Set Render Path", icon="RENDER_STILL")
 # Publish Asset Browser
 
 def is_collection_linked_and_not_overridden(col):

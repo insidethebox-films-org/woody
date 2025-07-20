@@ -125,7 +125,7 @@ class PIPE_OT_create_asset(bpy.types.Operator):
         base_path = Path(base_path) / "assets" / my_props.group_folder
 
         folders = {
-                my_props.asset: ["ref", "model", "lookdev", "rigging"],
+                my_props.asset: ["ref", "model", "lookdev", "rigging", "cg"],
         }
 
         create_folders_subfolders(folders, base_path)
@@ -182,7 +182,7 @@ class PIPE_OT_create_shot(bpy.types.Operator):
 
         # Dictionary of folders and subfolders
         folders = {
-                my_props.shot: ["ref", "layout", "FX", "lighting", "animation"],
+                my_props.shot: ["ref", "layout", "FX", "lighting", "animation", "cg"],
         }
 
         create_folders_subfolders(folders, base_path)
@@ -301,7 +301,22 @@ class PIPE_OT_publish(bpy.types.Operator):
         
         return {"FINISHED"}
 
-from pathlib import Path
+class PIPE_OT_set_output_cg(bpy.types.Operator):
+    bl_idname = "pipe.set_output_cg"
+    bl_label = "Set Output to CG Folder"
+    bl_description = "Set render output path to the cg folder"
+
+    def execute(self, context):
+        success = set_render_output_to_cg()
+        if success:
+            self.report({'INFO'}, "✅ Render output path set to CG folder")
+            return {'FINISHED'}
+        else:
+            self.report({'WARNING'}, "⚠️ Could not set path — are you in a valid asset/shot file?")
+            return {'CANCELLED'}
+    
+
+# Woody Asset Browser
 
 class PIPE_OT_open_publish(bpy.types.Operator):
     bl_idname = "pipe.open_publish"

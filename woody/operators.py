@@ -315,6 +315,80 @@ class PIPE_OT_set_output_cg(bpy.types.Operator):
             self.report({'WARNING'}, "⚠️ Could not set path — are you in a valid asset/shot file?")
             return {'CANCELLED'}
     
+class PIPE_OT_render_with_prompt(bpy.types.Operator):
+    bl_idname = "pipe.render_with_prompt"
+    bl_label = "Render"
+    bl_description = "Render animation with version check"
+
+    choice: bpy.props.EnumProperty(
+        name="Render Option",
+        items=[
+            ('OVERWRITE', "Overwrite", "Overwrite existing files"),
+            ('NEW_VERSION', "New Version", "Create a new version and render there"),
+        ],
+        default='OVERWRITE'
+    )  # type: ignore
+
+    def execute(self, context):
+        render_path = Path(bpy.path.abspath(context.scene.render.filepath))
+
+        # Check that we're in a valid asset/shot path
+        if not bpy.data.filepath:
+            self.report({'ERROR'}, "🚨 File not saved yet.")
+            return {'CANCELLED'}
+
+        root, group, asset, type_ = context_names()
+        if root not in {"assets", "shots"} or group == "GROUP" or asset == "ASSET":
+            self.report({'ERROR'}, f"🚨 Unexpected path: {root}/{group}/{asset}")
+            return {'CANCELLED'}
+
+        if self.choice == 'NEW_VERSION':
+            success = set_render_output_to_cg()
+            if not success:
+                self.report({'ERROR'}, "⚠️ Failed to set a new version render path.")
+                return {'CANCELLED'}
+
+            render_path = Path(bpy.path.abspath(context.scene.render.filepath))
+            self.report({'INFO'}, f"🆕 New version folder set: {render_path}")
+
+        else:
+            self.report({'INFO'}, f"📝 Overwriting frames in: {render_path}")
+        
+        bpy.ops.wm.save_mainfile()
+        bpy.ops.render.render(animation=True)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        render_path = Path(bpy.path.abspath(context.scene.render.filepath))
+
+        # Check that we're in a valid asset/shot path
+        if not bpy.data.filepath:
+            self.report({'ERROR'}, "🚨 File not saved yet.")
+            return {'CANCELLED'}
+
+        root, group, asset, type_ = context_names()
+        if root not in {"assets", "shots"} or group == "GROUP" or asset == "ASSET":
+            self.report({'ERROR'}, f"🚨 Unexpected path: {root}/{group}/{asset}")
+            return {'CANCELLED'}
+
+        if not render_path.is_dir():
+            return self.execute(context)
+
+        has_existing_frames = any(
+            f.suffix.lower() in ('.png', '.jpg', '.jpeg', '.exr', '.blend')
+            for f in render_path.iterdir()
+            if f.is_file()
+        )
+
+        if has_existing_frames:
+            return context.window_manager.invoke_props_dialog(self)
+        else:
+            return self.execute(context)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Output folder has existing frames.")
+        layout.prop(self, "choice", expand=True)
 
 # Woody Asset Browser
 

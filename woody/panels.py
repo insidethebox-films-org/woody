@@ -72,9 +72,17 @@ class VIEW3D_PT_assets_shots(bpy.types.Panel):
         publishBox.label(text="Publish")
         publishBox.scale_y = 0.65
         
-        row1 = layout.row()
-        row1.operator("pipe.publish", text="Publish", icon="DISK_DRIVE")
+        row3 = layout.row()
+        row3.operator("pipe.publish", text="Publish", icon="DISK_DRIVE")
         
+        publishBox = layout.box()
+        publishBox.label(text="Render")
+        publishBox.scale_y = 0.65
+
+        row4 = layout.row()
+        row4.operator("pipe.set_output_cg", text="Set Render Path", icon="RENDER_STILL")
+        row4.operator("pipe.render_with_prompt", text="Render", icon="RENDER_ANIMATION")
+
 # Publish Asset Browser
 
 def is_collection_linked_and_not_overridden(col):

@@ -117,3 +117,27 @@ def get_next_version_folder(base_path):
     else:
         # Folder is empty → reuse it
         return latest_version_path
+
+def apply_render_config(config_path: str):
+    
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+
+    render = bpy.context.scene.render
+    image_settings = render.image_settings
+    settings = config.get("render_settings", {})
+    
+    #Apply settings from projConfig json 
+    render.resolution_x = settings.get("resolution_x", render.resolution_x)
+    render.resolution_y = settings.get("resolution_y", render.resolution_y)
+    render.pixel_aspect_x = settings.get("aspect_x", render.pixel_aspect_x)
+    render.pixel_aspect_y = settings.get("aspect_y", render.pixel_aspect_y)
+    render.fps = settings.get("frame_rate", render.fps)
+
+    image_settings.file_format = settings.get("file_format", image_settings.file_format)
+    image_settings.color_mode = settings.get("color_mode", image_settings.color_mode)
+    image_settings.color_depth = settings.get("color_depth", image_settings.color_depth)
+    image_settings.compression = settings.get("compression", image_settings.compression)
+
+
+    print(f"✅ Render settings applied from {config_path}")

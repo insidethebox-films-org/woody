@@ -1,0 +1,12 @@
+{
+  "name": "woody",
+  "version": "0.2.1",
+  "author": "ITB",
+  "blender_min_version": "4.2.0",
+  "description": "A pipeline tool",
+  "entry": "./woody/__init__.py",
+  "category": "Tool",
+  "type": "python", 
+  "url": "https://github.com/insidethebox-films-org/woody/tree/convertToExtension",
+  "update_url": "https://github.com/insidethebox-films-org/woody/tree/convertToExtension"
+}

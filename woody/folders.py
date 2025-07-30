@@ -22,12 +22,33 @@ def create_folders_subfolders(folders, base_path):
             for subfolder in subfolders:
                 (main_path / subfolder).mkdir(parents=True, exist_ok=True)
 
+def create_default_proj_config(path: Path):
+    default_config = {
+        "render_settings": {
+            "resolution_x": 2000,
+            "resolution_y": 1000,
+            "aspect_x": 4.0,
+            "aspect_y": 3.0,
+            "frame_rate": 48,
+            "file_format": "OPEN_EXR",
+            "color_mode": "BW",
+            "color_depth": "16",
+            "compression": 30
+        }
+    }
+
+    config_path = path / "projConfig.json"
+    with config_path.open("w") as f:
+        json.dump(default_config, f, indent=2)
+
 # Create enums based on json
 
 def load_json_data(context):
     global _json_cache
     if _json_cache is None:
         print("================= Loading new JSON data... =================")
+        
+        # ??? Is context needed, both scene and my_props are unused ???
         scene = context.scene
         my_props = scene.woody
 
@@ -109,6 +130,7 @@ def get_type_folders(self, context):
 
 # Generate and save json folder structure
 
+# ??? Should we still exclude _publish ???
 def get_folder_structure(base_path, depth=0, exclude_names=("_publish",)):
     folder_dict = {}
 

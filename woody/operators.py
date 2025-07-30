@@ -34,6 +34,7 @@ class PIPE_OT_create_project(bpy.types.Operator):
         }
 
         create_folders_subfolders(folders, base_path)
+        create_default_proj_config(base_path)
 
         return {"FINISHED"}
     
@@ -203,6 +204,7 @@ class PIPE_OT_create_shot(bpy.types.Operator):
         layout.prop(my_props, "shot")
         layout.prop(my_props, "typeShot")
 
+# ??? Operator is called Open asset but also opens shots ???
 class PIPE_OT_open_asset(bpy.types.Operator):
 
     bl_idname = "pipe.open_asset"
@@ -307,6 +309,7 @@ class PIPE_OT_set_output_cg(bpy.types.Operator):
     bl_description = "Set render output path to the cg folder"
 
     def execute(self, context):
+        print("GET DIR: ",get_directory())
         success = set_render_output_to_cg()
         if success:
             self.report({'INFO'}, "✅ Render output path set to CG folder")
@@ -314,6 +317,32 @@ class PIPE_OT_set_output_cg(bpy.types.Operator):
         else:
             self.report({'WARNING'}, "⚠️ Could not set path — are you in a valid asset/shot file?")
             return {'CANCELLED'}
+
+class OT_ApplyRenderConfig(bpy.types.Operator):
+    bl_idname = "pipe.apply_render_config"
+    bl_label = "Apply Render Config"
+    bl_description = "Apply settings from projConfig.json"
+
+    def execute(self, context):
+        blend_path = bpy.data.filepath
+        if not blend_path:
+            self.report({'WARNING'}, "⚠️ Could not set path — are you in a valid asset/shot file?")
+            return {'CANCELLED'}
+        
+        project_root = get_directory()
+
+        if not project_root:
+            self.report({'WARNING'}, "⚠️ Could not find project root")
+            return {'CANCELLED'}
+
+        config_path = os.path.join(project_root, "projConfig.json")
+        if not os.path.isfile(config_path):
+            self.report({'WARNING'}, f"⚠️ No projConfig.json found at: {config_path}")
+            return {'CANCELLED'}
+
+        apply_render_config(config_path)
+        self.report({'INFO'}, f"✅ Render config applied from {config_path}")
+        return {'FINISHED'}
     
 class PIPE_OT_render_with_prompt(bpy.types.Operator):
     bl_idname = "pipe.render_with_prompt"

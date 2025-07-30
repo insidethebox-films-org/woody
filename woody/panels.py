@@ -81,7 +81,9 @@ class VIEW3D_PT_assets_shots(bpy.types.Panel):
 
         row4 = layout.row()
         row4.operator("pipe.set_output_cg", text="Set Render Path", icon="RENDER_STILL")
-        row4.operator("pipe.render_with_prompt", text="Render", icon="RENDER_ANIMATION")
+        row4.operator("pipe.apply_render_config", text="Set Configs", icon="PREFERENCES")
+        
+        layout.operator("pipe.render_with_prompt", text="Render", icon="RENDER_ANIMATION")
 
 # Publish Asset Browser
 

@@ -7,6 +7,6 @@
   "entry": "woody/__init__.py",
   "category": "Tool",
   "type": "python", 
-  "url": "https://github.com/insidethebox-films-org/woody/tree/convertToExtension",
-  "update_url": "https://github.com/insidethebox-films-org/woody/tree/convertToExtension"
+  "url": "https://github.com/insidethebox-films-org/woody",
+  "update_url": "https://github.com/insidethebox-films-org/woody"
 }

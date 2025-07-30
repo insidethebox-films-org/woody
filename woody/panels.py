@@ -199,3 +199,16 @@ class VIEW3D_PT_publish_browser(bpy.types.Panel):
                 row.label(text=col_item.name, icon="LIBRARY_DATA_OVERRIDE")
         else:
             col.label(text="No overridden published collections.")
+
+class VIEW3D_PT_turntable(bpy.types.Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_label = "Render"
+    bl_category = "WoodyTools"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator("pipe.create_camera")
+
+        

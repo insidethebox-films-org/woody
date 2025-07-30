@@ -6,11 +6,14 @@ import subprocess
 import bpy
 import json
 from pathlib import Path
+from mathutils import Euler
+from mathutils import Vector
 
 from .utils import *
 from .folders import *
 from .blend_functions import *
 from .context import *
+from .preferences import get_turntableScene
 
 class PIPE_OT_create_project(bpy.types.Operator):
     # Creates a new project with the correct folder structure in the base project directory
@@ -31,6 +34,7 @@ class PIPE_OT_create_project(bpy.types.Operator):
                 "assets": [],
                 "shots": [],
                 "_publish": [],
+                "defScenes": [],
         }
 
         create_folders_subfolders(folders, base_path)
@@ -411,3 +415,25 @@ class PIPE_OT_override_collection(bpy.types.Operator):
             self.report({'ERROR'}, f"Override failed: {e}")
             return {'CANCELLED'}
         
+class PIPE_OT_create_camera(bpy.types.Operator):
+    
+    bl_idname = "pipe.create_camera"
+    bl_label = "Add Turntable"
+
+    def execute(self, context):
+            
+        filepath = get_turntableScene()
+        scene_name = "turntable"            
+
+        if not os.path.exists(filepath):
+            print(f"⚠️ File does not exist: {filepath}")
+            return
+
+        with bpy.data.libraries.load(filepath, link=False) as (data_from, data_to):
+            if scene_name in data_from.scenes:
+                data_to.scenes = [scene_name]
+                print(f"✅ Successfully linked scene data-block: '{scene_name}'")
+            else:
+                print(f"⚠️ Scene '{scene_name}' not found in file: {filepath}")
+
+        return {'FINISHED'}

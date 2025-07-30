@@ -14,6 +14,7 @@ class Preferences(bpy.types.AddonPreferences):
 
     directory: bpy.props.StringProperty(name= "Directory", subtype='FILE_PATH', description="The directory of your project") # type: ignore
     blenderVersion: bpy.props.StringProperty(name= "EXE Path", subtype='FILE_PATH', description="Path to your blender.exe") # type: ignore
+    turntableScene: bpy.props.StringProperty(name= "Turntable Scene", subtype='FILE_PATH', description="Path to your turntable scene") # type: ignore
 
     def draw(self, context):
         layout = self.layout
@@ -27,9 +28,16 @@ class Preferences(bpy.types.AddonPreferences):
         layout.prop(self, "directory")
         layout.prop(self, "blenderVersion")
 
+        pathsBox = layout.box()
+        pathsBox.label(text="Blend Paths")
+        pathsBox.scale_y = 0.65
+
+        layout.prop(self, "turntableScene")
+
         projectBox = layout.box()
         projectBox.label(text="Project")
         projectBox.scale_y = 0.65
+
 
         row1 = self.layout.row()
         row1.operator("pipe.create_project", text="Create Project", icon="WORLD")
@@ -46,3 +54,7 @@ def get_directory():
 def get_blender_version():
     preferences = get_preferences()
     return preferences.blenderVersion
+
+def get_turntableScene():
+    preferences = get_preferences()
+    return preferences.turntableScene

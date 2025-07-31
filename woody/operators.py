@@ -131,10 +131,14 @@ class PIPE_OT_create_asset(bpy.types.Operator):
 
         create_folders_subfolders(folders, base_path)
 
+        root, group, asset, type_ = context_names()
+        collection_name = root + "_" + group + "_" + asset + "_" + type_
+
         base_path = Path(base_path) / my_props.asset / my_props.typeAsset
         file_name = f"{my_props.asset}_{my_props.typeAsset}_latest.blend"
         full_path = base_path / file_name
-        new_blend(blender_exe=blenderVersion, new_file_name=full_path)
+        # ??? Why is there a keyword argument to parse the arguments ???
+        new_blend(blender_exe=blenderVersion, new_file_name=full_path, collection_name=collection_name)
 
         return {"FINISHED"}
 

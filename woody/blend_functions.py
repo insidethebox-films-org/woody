@@ -6,14 +6,17 @@ import subprocess
 import bpy
 import json
 from pathlib import Path
+from .context import *
+from .utils import *
 
-def new_blend(blender_exe, new_file_name):
+def new_blend(blender_exe, new_file_name, collection_name):
 
     blender_exe_path = Path(blender_exe)
     if not blender_exe_path.exists():
         print(f"❌ Error: Blender executable not found at {blender_exe}")
         return
 
+    # ??? is this else needed, or is there logic to avoid it ???
     if bpy.data.filepath:
         current_directory = Path(bpy.path.abspath("//"))
     else:
@@ -22,11 +25,18 @@ def new_blend(blender_exe, new_file_name):
 
     new_file_path = current_directory / new_file_name
 
+   
+
+    python_expr = f"""
+import bpy
+bpy.data.collections['Collection'].name = '{collection_name}'
+bpy.ops.wm.save_mainfile(filepath=r'{new_file_path}')
+"""
+
     command = [
         str(blender_exe_path),
         "--background",
-        "--python-expr",
-        f"import bpy; bpy.ops.wm.save_mainfile(filepath=r'{new_file_path}')"
+        "--python-expr", python_expr
     ]
 
     subprocess.Popen(command)

@@ -8,6 +8,8 @@ __pycache__/
 # Ignore zip files like woody.zip
 woody.zip
 
+updateZip.py
+
 # Ignore OS metadata
 .DS_Store
 Thumbs.db

@@ -1,14 +1,12 @@
 schema_version = "1.0.0"
 
-
 id = "woody"
 version = "0.2.1"
 name = "Woody"
-tagline = "A piepline tool"
+tagline = "A pipeline tool"
 maintainer = "ITB"
 
 type = "add-on"
-
 
 blender_version_min = "4.2.0"
 

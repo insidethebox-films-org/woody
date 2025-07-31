@@ -1,13 +1,3 @@
-bl_info = {
-    "name": "Woody",
-    "author": "Oscar Bartle",
-    "version": (0,2,1),     
-    "blender": (4,2,5),
-    "location": "3D Viewport > Sidebar > Woody",
-    "description": "A pipeline tool",
-    "category": "Development",
-}
-
 import os
 import re
 import uuid

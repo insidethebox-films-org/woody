@@ -57,9 +57,9 @@ class MyProperties(bpy.types.PropertyGroup):
         name="Type",
         description="Choose an asset type",
         items=[
-            ("ref", "ref", "ref"),
             ("model", "model", "model"),
-            ("lookdev", "lookdev", "lookdev")
+            ("lookdev", "lookdev", "lookdev"),
+            ("rigging", "rigging", "rigging"),
         ],
         default="model"  # Default value
     ) # type: ignore

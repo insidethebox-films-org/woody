@@ -27,14 +27,29 @@ def create_blend_with_collection(file_name, collection_name, target_directory):
         print(f"❌ Collection '{collection_name}' not found in current file.")
         return
 
-    # #Get all objects inside the collection
-    # objects = {obj for obj in collection.all_objects}
+    # Recursively gather all collections
+    def gather_collections(col, seen=None):
+        if seen is None:
+            seen = set()
+        seen.add(col)
+        for child in col.children:
+            if child not in seen:
+                gather_collections(child, seen)
+        return seen
 
-    # #Optionally gather mesh, materials, etc.
-    # meshes = {obj.data for obj in objects if obj.type == 'MESH' and obj.data}
-    # materials = {mat for obj in objects if obj.type == 'MESH' for mat in obj.data.materials if mat}
+    collections = gather_collections(collection)
     
-    datablocks = {collection} #| objects | meshes | materials
+    # Gather all objects in all collections
+    objects = set()
+    for col in collections:
+        for obj in col.objects:
+            objects.add(obj)
+
+    # Gather meshes and materials used by objects
+    meshes = {obj.data for obj in objects if obj.type == 'MESH' and obj.data}
+    materials = {mat for obj in objects if obj.type == 'MESH' for mat in obj.data.materials if mat}
+
+    datablocks = {collection} | collections | objects | meshes | materials
 
     try:
         bpy.data.libraries.write(
@@ -43,7 +58,7 @@ def create_blend_with_collection(file_name, collection_name, target_directory):
             fake_user=True,
             compress=True
         )
-        #print(f"✅ Exported: '{collection_name}' with {len(objects)} object(s), {len(meshes)} mesh(es), {len(materials)} material(s)")
+        print(f"✅ Exported: '{collection_name}' with {len(objects)} object(s), {len(meshes)} mesh(es), {len(materials)} material(s)")
     except Exception as e:
         print(f"❌ Failed to export collection: {e}")
 

@@ -131,8 +131,7 @@ class PIPE_OT_create_asset(bpy.types.Operator):
 
         create_folders_subfolders(folders, base_path)
 
-        root, group, asset, type_ = context_names()
-        collection_name = root + "_" + group + "_" + asset + "_" + type_
+        collection_name = f"assets_{my_props.group_folder}_{my_props.asset}_{my_props.typeAsset}"
 
         base_path = Path(base_path) / my_props.asset / my_props.typeAsset
         file_name = f"{my_props.asset}_{my_props.typeAsset}_latest.blend"
@@ -192,10 +191,12 @@ class PIPE_OT_create_shot(bpy.types.Operator):
 
         create_folders_subfolders(folders, base_path)
 
+        collection_name = f"shots_{my_props.group_folder}_{my_props.shot}_{my_props.typeShot}"
+
         base_path = Path(base_path) / my_props.shot / my_props.typeShot
         file_name = f"{my_props.shot}_{my_props.typeShot}_latest.blend"
         full_path = base_path / file_name
-        new_blend(blender_exe=blenderVersion, new_file_name=full_path)
+        new_blend(blender_exe=blenderVersion, new_file_name=full_path, collection_name=collection_name)
 
         return {"FINISHED"}
 

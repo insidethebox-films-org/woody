@@ -100,9 +100,15 @@ def is_collection_linked_and_not_overridden(col):
 def is_collection_override_of_published(col):
     if not col.override_library:
         return False
+
+    # Make sure it's directly in the scene
+    if col.name not in [c.name for c in bpy.context.scene.collection.children]:
+        return False
+
     ref = col.override_library.reference
     if not ref or not ref.library:
         return False
+
     return "_published.blend" in ref.library.filepath
 
 def is_published_file_already_in_scene(blend_path):

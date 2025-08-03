@@ -1,9 +1,9 @@
 import bpy
 
-# Cache the addon key so we only look it up once
 _addon_key_cache = None
 
 def get_addon_key():
+    """Return the correct addon key whether installed locally or remotely."""
     global _addon_key_cache
     if _addon_key_cache:
         return _addon_key_cache
@@ -24,15 +24,14 @@ def get_preferences():
     return bpy.context.preferences.addons[addon_key].preferences
 
 def get_directory():
-    preferences = get_preferences()
-    return preferences.directory if preferences else ""
+    prefs = get_preferences()
+    return prefs.directory if prefs else ""
 
 def get_blender_version():
-    preferences = get_preferences()
-    return preferences.blenderVersion if preferences else ""
+    prefs = get_preferences()
+    return prefs.blenderVersion if prefs else ""
 
 
-# Preferences class & properties
 class Preferences_Properties:
     directory: bpy.props.StringProperty(
         name="Directory",
@@ -43,4 +42,4 @@ class Preferences_Properties:
         name="EXE Path",
         subtype='FILE_PATH',
         description="Path to your blender.exe"
-    )  # type: ignore
+    ) # type: ignore

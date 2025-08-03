@@ -21,11 +21,8 @@ from .operators import (
 from .panels import (
     VIEW3D_PT_context, VIEW3D_PT_assets_shots, VIEW3D_PT_publish_browser
 )
-
-
-# Addon Preferences Panel
 class preferences_panel(Preferences_Properties, bpy.types.AddonPreferences):
-    bl_idname = __package__  # dynamically resolves correctly for remote extensions
+    bl_idname = __package__ 
 
     def draw(self, context):
         layout = self.layout

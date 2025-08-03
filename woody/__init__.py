@@ -14,7 +14,7 @@ from .preferences import Preferences_Properties
 from .operators import (
     PIPE_OT_create_project, PIPE_OT_create_group, PIPE_OT_create_asset,
     PIPE_OT_create_shot, PIPE_OT_open_asset, PIPE_OT_version_up,
-    PIPE_OT_publish, PIPE_OT_set_output_cg, OT_ApplyRenderConfig,
+    PIPE_OT_publish, PIPE_OT_set_output_cg, PIPE_OT_apply_render_config,
     PIPE_OT_render_with_prompt, PIPE_OT_open_publish, PIPE_OT_clear_enum,
     PIPE_OT_override_collection
 )
@@ -56,7 +56,7 @@ classes = [
     PIPE_OT_version_up,
     PIPE_OT_publish,
     PIPE_OT_set_output_cg,
-    OT_ApplyRenderConfig,
+    PIPE_OT_apply_render_config,
     PIPE_OT_render_with_prompt,
     PIPE_OT_open_publish,
     PIPE_OT_clear_enum,

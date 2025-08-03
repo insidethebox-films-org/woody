@@ -3,7 +3,6 @@ import bpy
 _addon_key_cache = None
 
 def get_addon_key():
-    """Return the correct addon key whether installed locally or remotely."""
     global _addon_key_cache
     if _addon_key_cache:
         return _addon_key_cache

@@ -7,9 +7,9 @@ import bpy
 import json
 from pathlib import Path
 
-ADDON_NAME = 'woody'
+ADDON_NAME = __package__
 
-class Preferences_Properties:
+class Preferences_Properties:   
     directory: bpy.props.StringProperty(name= "Directory", subtype='FILE_PATH', description="The directory of your project") # type: ignore
     blenderVersion: bpy.props.StringProperty(name= "EXE Path", subtype='FILE_PATH', description="Path to your blender.exe") # type: ignore
 

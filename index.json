@@ -6,7 +6,7 @@
       "schema_version": "1.0.0",
       "id": "woody",
       "name": "Woody",
-      "tagline": "A piepline tool",
+      "tagline": "A pipeline tool",
       "version": "0.2.1",
       "type": "add-on",
       "maintainer": "ITB",
@@ -15,8 +15,8 @@
       ],
       "blender_version_min": "4.2.0",
       "archive_url": "./woody.zip",
-      "archive_size": 22223,
-      "archive_hash": "sha256:d76bc491bb1605b7e677597c440027656d526a8a8bb78bde8b5883696b38d9e2"
+      "archive_size": 21764,
+      "archive_hash": "sha256:e75586ca388c62f8d4f911286fb6d6a6309c45359be08519e75ca895ee3e5832"
     }
   ]
 }

@@ -1,26 +1,46 @@
-import os
-import re
-import uuid
-import shutil
-import subprocess
 import bpy
-import json
-from pathlib import Path
 
-ADDON_NAME = __package__
+# Cache the addon key so we only look it up once
+_addon_key_cache = None
 
-class Preferences_Properties:   
-    directory: bpy.props.StringProperty(name= "Directory", subtype='FILE_PATH', description="The directory of your project") # type: ignore
-    blenderVersion: bpy.props.StringProperty(name= "EXE Path", subtype='FILE_PATH', description="Path to your blender.exe") # type: ignore
+def get_addon_key():
+    global _addon_key_cache
+    if _addon_key_cache:
+        return _addon_key_cache
+
+    current_name = __name__
+    for addon_key in bpy.context.preferences.addons.keys():
+        if current_name.startswith(addon_key):
+            _addon_key_cache = addon_key
+            return addon_key
+
+    print(f"[Woody] Could not determine addon key for __name__: {__name__}")
+    return None
 
 def get_preferences():
-    preferences = bpy.context.preferences.addons[ADDON_NAME].preferences
-    return preferences
+    addon_key = get_addon_key()
+    if not addon_key:
+        return None
+    return bpy.context.preferences.addons[addon_key].preferences
 
 def get_directory():
     preferences = get_preferences()
-    return preferences.directory
+    return preferences.directory if preferences else ""
 
 def get_blender_version():
     preferences = get_preferences()
-    return preferences.blenderVersion
+    return preferences.blenderVersion if preferences else ""
+
+
+# Preferences class & properties
+class Preferences_Properties:
+    directory: bpy.props.StringProperty(
+        name="Directory",
+        subtype='FILE_PATH',
+        description="The directory of your project"
+    ) # type: ignore
+    blenderVersion: bpy.props.StringProperty(
+        name="EXE Path",
+        subtype='FILE_PATH',
+        description="Path to your blender.exe"
+    )  # type: ignore

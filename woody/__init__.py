@@ -18,11 +18,34 @@ import json
 from pathlib import Path
 
 from .properties import MyProperties
-from .preferences import Preferences
+from .preferences import Preferences_Properties
 from .operators import PIPE_OT_create_project, PIPE_OT_create_group, PIPE_OT_create_asset, PIPE_OT_create_shot, PIPE_OT_open_asset, PIPE_OT_version_up, PIPE_OT_publish, PIPE_OT_set_output_cg, OT_ApplyRenderConfig, PIPE_OT_render_with_prompt, PIPE_OT_open_publish, PIPE_OT_clear_enum, PIPE_OT_override_collection
 from .panels import VIEW3D_PT_context, VIEW3D_PT_assets_shots, VIEW3D_PT_publish_browser
 
 ADDON_NAME = __name__
+
+class preferences_panel(Preferences_Properties, bpy.types.AddonPreferences):
+    bl_idname = ADDON_NAME
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        my_props = scene.woody
+        
+        pathsBox = layout.box()
+        pathsBox.label(text="Paths")
+        pathsBox.scale_y = 0.65
+
+        layout.prop(self, "directory")
+        layout.prop(self, "blenderVersion")
+
+        projectBox = layout.box()
+        projectBox.label(text="Project")
+        projectBox.scale_y = 0.65
+
+        row1 = self.layout.row()
+        row1.operator("pipe.create_project", text="Create Project", icon="WORLD")
+        row1.operator("wm.save_userpref", text="Save Project", icon="DOCUMENTS")
 
 #===============              
 # Registration
@@ -43,7 +66,7 @@ classes = [
     PIPE_OT_open_publish,
     PIPE_OT_clear_enum,
     PIPE_OT_override_collection,
-    Preferences,
+    preferences_panel,
     VIEW3D_PT_context,
     VIEW3D_PT_assets_shots,
     VIEW3D_PT_publish_browser

@@ -323,7 +323,7 @@ class PIPE_OT_set_output_cg(bpy.types.Operator):
             self.report({'WARNING'}, "⚠️ Could not set path — are you in a valid asset/shot file?")
             return {'CANCELLED'}
 
-class OT_ApplyRenderConfig(bpy.types.Operator):
+class PIPE_OT_apply_render_config(bpy.types.Operator):
     bl_idname = "pipe.apply_render_config"
     bl_label = "Apply Render Config"
     bl_description = "Apply settings from projConfig.json"

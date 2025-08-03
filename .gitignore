@@ -6,7 +6,6 @@ __pycache__/
 .vscode/
 
 # Ignore zip files like woody.zip
-woody.zip
 
 updateZip.py
 

@@ -9,7 +9,7 @@ from pathlib import Path
 from .context import *
 from .utils import *
 
-def new_blend(blender_exe, new_file_name, collection_name):
+def new_blend(blender_exe, new_file_name, collection_name, config_path):
 
     blender_exe_path = Path(blender_exe)
     if not blender_exe_path.exists():
@@ -25,11 +25,19 @@ def new_blend(blender_exe, new_file_name, collection_name):
 
     new_file_path = current_directory / new_file_name
 
-   
+    frame_start = 0  # Default Value for both Asset and Shot, should match default config
+    frame_end = 100 # Default Value for both Asset and Shot, should match default config
+    if config_path and Path(config_path).exists():
+        with open(config_path, "r") as f:
+            config_data = json.load(f)
+            frame_start = config_data.get("frame_start", 0)
+            frame_end = config_data.get("frame_end", 100)
 
     python_expr = f"""
 import bpy
 bpy.data.collections['Collection'].name = '{collection_name}'
+bpy.context.scene.frame_start = {frame_start}
+bpy.context.scene.frame_end = {frame_end}
 bpy.ops.wm.save_mainfile(filepath=r'{new_file_path}')
 """
 
@@ -50,7 +58,7 @@ bpy.ops.wm.save_mainfile(filepath=r'{new_file_path}')
 
     print(f"Opening new Blender instance with file: {new_file_path}")
 
-def open_blend(blender_exe, blend_file_path):
+def open_blend(blender_exe, blend_file_path, config_path):
     blender_exe_path = Path(blender_exe)
     blend_file = Path(blend_file_path)
 
@@ -62,7 +70,11 @@ def open_blend(blender_exe, blend_file_path):
         print(f"❌ Error: .blend file not found at {blend_file_path}")
         return
 
-    subprocess.Popen([str(blender_exe_path), str(blend_file)])
+    if config_path:
+        config_script = generate_config_script(config_path)
+        subprocess.Popen([str(blender_exe_path), str(blend_file), '--python', str(config_script)])
+    else:
+        subprocess.Popen([str(blender_exe_path), str(blend_file)])
 
     print(f"Opening new Blender instance with file: {blend_file_path}")
 

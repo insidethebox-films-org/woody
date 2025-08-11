@@ -75,15 +75,35 @@ class VIEW3D_PT_assets_shots(bpy.types.Panel):
         row3 = layout.row()
         row3.operator("pipe.publish", text="Publish", icon="DISK_DRIVE")
         
-        publishBox = layout.box()
-        publishBox.label(text="Render")
-        publishBox.scale_y = 0.65
+        renderBox = layout.box()
+        renderBox.label(text="Render")
+        renderBox.scale_y = 0.65
 
         row4 = layout.row()
         row4.operator("pipe.set_output_cg", text="Set Render Path", icon="RENDER_STILL")
         row4.operator("pipe.apply_render_config", text="Set Configs", icon="PREFERENCES")
         
         layout.operator("pipe.render_with_prompt", text="Render", icon="RENDER_ANIMATION")
+
+class VIEW3D_PT_settings(bpy.types.Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_label = "Settings"
+    bl_category = "Woody"
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        
+        frameBox = layout.box()
+        frameBox.label(text="Frame Range")
+        frameBox.scale_y = 0.65
+
+        
+
+        layout.prop(scene, "shot_frame_start")
+        layout.prop(scene, "shot_frame_end")
+        layout.operator("pipe.set_frame_range", text="Set Frame Range")
 
 # Publish Asset Browser
 

@@ -137,7 +137,7 @@ class PIPE_OT_create_asset(bpy.types.Operator):
         file_name = f"{my_props.asset}_{my_props.typeAsset}_latest.blend"
         full_path = base_path / file_name
         # ??? Why is there a keyword argument to parse the arguments ???
-        new_blend(blender_exe=blenderVersion, new_file_name=full_path, collection_name=collection_name)
+        new_blend(blender_exe=blenderVersion, new_file_name=full_path, collection_name=collection_name, config_path=None)
 
         return {"FINISHED"}
 
@@ -190,13 +190,20 @@ class PIPE_OT_create_shot(bpy.types.Operator):
         }
 
         create_folders_subfolders(folders, base_path)
+        
+        config_path = base_path / my_props.shot / "shot_config.json"
+        config_data = {
+            "frame_start": 0,
+            "frame_end": 100,
+        }
+        create_shot_config_file(config_path, config_data)
 
         collection_name = f"shots_{my_props.group_folder}_{my_props.shot}_{my_props.typeShot}"
 
         base_path = Path(base_path) / my_props.shot / my_props.typeShot
         file_name = f"{my_props.shot}_{my_props.typeShot}_latest.blend"
         full_path = base_path / file_name
-        new_blend(blender_exe=blenderVersion, new_file_name=full_path, collection_name=collection_name)
+        new_blend(blender_exe=blenderVersion, new_file_name=full_path, collection_name=collection_name, config_path=config_path)
 
         return {"FINISHED"}
 
@@ -237,9 +244,10 @@ class PIPE_OT_open_asset(bpy.types.Operator):
         blenderVersion = get_blender_version()
 
         base_path = Path(bpy.path.abspath(directory)) / my_props.root_folder / my_props.group_folder / my_props.asset_folder / my_props.type_folder
+        config_path = Path(bpy.path.abspath(directory)) / my_props.root_folder / my_props.group_folder / my_props.asset_folder / "shot_config.json"
         file_name = f"{my_props.asset_folder}_{my_props.type_folder}_latest.blend"
         full_path = base_path / file_name
-        open_blend(blender_exe=blenderVersion, blend_file_path=full_path)
+        open_blend(blender_exe=blenderVersion, blend_file_path=full_path, config_path=config_path)
 
         return {"FINISHED"}
 
@@ -323,7 +331,7 @@ class PIPE_OT_set_output_cg(bpy.types.Operator):
             self.report({'WARNING'}, "⚠️ Could not set path — are you in a valid asset/shot file?")
             return {'CANCELLED'}
 
-class OT_ApplyRenderConfig(bpy.types.Operator):
+class PIPE_OT_apply_render_config(bpy.types.Operator):
     bl_idname = "pipe.apply_render_config"
     bl_label = "Apply Render Config"
     bl_description = "Apply settings from projConfig.json"
@@ -424,6 +432,40 @@ class PIPE_OT_render_with_prompt(bpy.types.Operator):
         layout.label(text="Output folder has existing frames.")
         layout.prop(self, "choice", expand=True)
 
+class PIPE_OT_set_frame_range(bpy.types.Operator):
+    bl_idname = "pipe.set_frame_range"
+    bl_label = "Set Frame Range"
+    bl_description = "Update scene frame range and shot config file"
+
+    frame_start: bpy.props.IntProperty(name="Start Frame")# type:ignore
+    frame_end: bpy.props.IntProperty(name="End Frame")# type:ignore
+
+    def execute(self, context):
+        scene = context.scene
+        root, group, asset, type_ = context_names()
+
+        if root=="shots":
+            config_path = Path(bpy.path.abspath("//")).parent / "shot_config.json"
+
+            data = {}
+            if config_path.exists():
+                with open(config_path, "r") as f:
+                    data = json.load(f)
+
+            # Update with UI values
+            data["frame_start"] = scene.shot_frame_start
+            data["frame_end"] = scene.shot_frame_end
+
+            with open(config_path, "w") as f:
+                json.dump(data, f, indent=4)
+
+        # Apply to scene
+        scene.frame_start = scene.shot_frame_start
+        scene.frame_end = scene.shot_frame_end
+
+        self.report({'INFO'}, "Frame range updated")
+        return {'FINISHED'}
+
 # Woody Asset Browser
 
 class PIPE_OT_open_publish(bpy.types.Operator):
@@ -431,7 +473,7 @@ class PIPE_OT_open_publish(bpy.types.Operator):
     bl_label = "Open Publish"
     bl_description = "Link the first collection from a published .blend file into the current scene"
 
-    filepath: bpy.props.StringProperty()
+    filepath: bpy.props.StringProperty()# type:ignore
 
     def execute(self, context):
         blend_path = Path(self.filepath).resolve()
@@ -503,7 +545,7 @@ class PIPE_OT_clear_enum(bpy.types.Operator):
     bl_label = "Clear Selection"
     bl_description = "Reset this field to 'None'"
 
-    prop_name: bpy.props.StringProperty()
+    prop_name: bpy.props.StringProperty()# type:ignore
 
     def execute(self, context):
         setattr(context.scene.woody, self.prop_name, "NONE")
@@ -514,7 +556,7 @@ class PIPE_OT_override_collection(bpy.types.Operator):
     bl_label = "Override Linked Collection"
     bl_description = "Create a full library override (content) for the specified linked collection"
 
-    collection_name: bpy.props.StringProperty()
+    collection_name: bpy.props.StringProperty()# type:ignore
 
     def execute(self, context):
         col = bpy.data.collections.get(self.collection_name)

@@ -50,6 +50,11 @@ def create_default_proj_config(path: Path):
     with config_path.open("w") as f:
         json.dump(default_config, f, indent=2)
 
+def create_shot_config_file(config_path: Path, config_data: dict):
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(config_path, "w") as f:
+        json.dump(config_data, f, indent=4)
+
 # Create enums based on json
 
 def load_json_data(context):

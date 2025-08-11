@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "woody"
-version = "0.2.2"
+version = "0.2.3"
 name = "Woody"
 tagline = "A pipeline tool"
 maintainer = "ITB"

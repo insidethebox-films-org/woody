@@ -152,10 +152,6 @@ def apply_render_config(config_path: str):
 
     # File Output
     image_settings.file_format = settings.get("file_format", image_settings.file_format)
-    image_settings.color_mode = settings.get("color_mode", image_settings.color_mode)
-    image_settings.color_depth = settings.get("color_depth", image_settings.color_depth)
-    image_settings.compression = settings.get("compression", image_settings.compression)
-    image_settings.quality = settings.get("quality", image_settings.quality)
 
     # EXR-specific
     image_settings.exr_codec = settings.get("exr_codec", image_settings.exr_codec)

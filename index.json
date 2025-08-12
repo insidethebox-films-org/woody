@@ -15,8 +15,8 @@
       ],
       "blender_version_min": "4.2.0",
       "archive_url": "./woody.zip",
-      "archive_size": 22993,
-      "archive_hash": "sha256:ad006f53046343eed32466fc70f4e326dd59651b02563842b301c280a5d7b9a4"
+      "archive_size": 22980,
+      "archive_hash": "sha256:c612a80b0f241a26966d7de03e73694292035a98b660082ae6c2ced5ee809894"
     }
   ]
 }

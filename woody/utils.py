@@ -152,8 +152,6 @@ def apply_render_config(config_path: str):
 
     # File Output
     image_settings.file_format = settings.get("file_format", image_settings.file_format)
-
-    # EXR-specific
     image_settings.exr_codec = settings.get("exr_codec", image_settings.exr_codec)
 
     # Render Engine

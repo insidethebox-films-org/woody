@@ -25,15 +25,20 @@ def create_folders_subfolders(folders, base_path):
 def create_default_proj_config(path: Path):
     default_config = {
         "render_settings": {
-            "resolution_x": 2000,
-            "resolution_y": 1000,
-            "aspect_x": 4.0,
-            "aspect_y": 3.0,
-            "frame_rate": 48,
-            "file_format": "OPEN_EXR",
-            "color_mode": "BW",
-            "color_depth": "16",
-            "compression": 30
+            "resolution_x": 1920,
+            "resolution_y": 1080,
+            "fps": 24,
+            "file_format": "OPEN_EXR_MULTILAYER",
+            "exr_codec": "DWAA",
+            "engine": "CYCLES",
+            "use_motion_blur": True,
+            "motion_blur_shutter": 0.5,
+            "film_transparent": True,
+            "use_simplify": True,
+            "simplify_subdivision": 2,
+            "simplify_subdivision_render": 5,
+            "cycles_samples": 512,
+            "use_persistent_data": True,
         }
     }
 

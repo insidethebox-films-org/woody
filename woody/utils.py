@@ -176,7 +176,7 @@ def apply_render_config(config_path: str):
     render.use_persistent_data = settings.get("use_persistent_data", render.use_persistent_data)
     
 
-    print(f"✅ Render settings applied from {config_path}")
+    print(f"[apply_render_config]✅ Render settings applied from {config_path}")
 
 def generate_config_script(config_path):
     # Create a temp script that runs inside Blender
@@ -190,7 +190,7 @@ with open(r"{config_path}", "r") as f:
 
 bpy.context.scene.frame_start = config.get("frame_start", 1)
 bpy.context.scene.frame_end = config.get("frame_end", 250)
-print(f"✅ Frame range set from config: {{bpy.context.scene.frame_start}} to {{bpy.context.scene.frame_end}}")
+print(f"[generate_config_script] ✅ Frame range set from config: {{bpy.context.scene.frame_start}} to {{bpy.context.scene.frame_end}}")
 """)
     script.close()
     return script.name

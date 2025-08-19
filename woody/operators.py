@@ -590,6 +590,20 @@ class PIPE_OT_clear_enum(bpy.types.Operator):
         setattr(context.scene.woody, self.prop_name, "NONE")
         return {'FINISHED'}
 
+def unlink_collection_from_scene(col, parent=None):
+    """Recursively unlink a collection from the scene hierarchy if present."""
+    if parent is None:
+        parent = bpy.context.scene.collection
+
+    if col in parent.children.values():
+        parent.children.unlink(col)
+        return True  # ✅ stop after unlinking
+
+    for child in parent.children:
+        if unlink_collection_from_scene(col, child):
+            return True
+
+    return False
 class PIPE_OT_override_collection(bpy.types.Operator):
     bl_idname = "pipe.override_collection"
     bl_label = "Override Linked Collection"
@@ -614,13 +628,11 @@ class PIPE_OT_override_collection(bpy.types.Operator):
                 do_fully_editable=True
             )
 
-            # Attempt to unlink original linked collection from scene
-            children = context.scene.collection.children
-            for child in children:
-                if child.name == col.name:
-                    children.unlink(child)
-                    self.report({'INFO'}, f"Unlinked original linked collection: {child.name}")
-                    break
+            # ✅ Unlink the original linked collection (works at any depth)
+            if unlink_collection_from_scene(col):
+                self.report({'INFO'}, f"Unlinked original linked collection: {col.name}")
+            else:
+                self.report({'WARNING'}, f"Could not unlink {col.name} (was not in scene hierarchy).")
 
             self.report({'INFO'}, f"Full override created for: {override.name}")
             return {'FINISHED'}

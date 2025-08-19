@@ -108,9 +108,10 @@ class VIEW3D_PT_settings(bpy.types.Panel):
 # Publish Asset Browser
 
 def is_collection_linked_and_not_overridden(col):
+    """Return True if collection is linked directly (from _published.blend), in scene, and not overridden."""
     if not col.library:
         return False
-    if col.name not in [c.name for c in bpy.context.scene.collection.children]:
+    if not collection_in_scene(col):  # ✅ works at any depth
         return False
     for other in bpy.data.collections:
         if other.override_library and other.override_library.reference == col:
@@ -118,11 +119,11 @@ def is_collection_linked_and_not_overridden(col):
     return "_published.blend" in col.library.filepath
 
 def is_collection_override_of_published(col):
+    """Return True if collection is an override of a published link in the scene."""
     if not col.override_library:
         return False
 
-    # Make sure it's directly in the scene
-    if col.name not in [c.name for c in bpy.context.scene.collection.children]:
+    if not collection_in_scene(col):  # ✅ works at any depth
         return False
 
     ref = col.override_library.reference
@@ -134,14 +135,37 @@ def is_collection_override_of_published(col):
 def is_published_file_already_in_scene(blend_path):
     for c in bpy.data.collections:
         if c.library and c.library.filepath == blend_path and not c.override_library:
-            if c.name in [cc.name for cc in bpy.context.scene.collection.children]:
+            if collection_in_scene(c):
                 return True
         if c.override_library:
             ref = c.override_library.reference
             if ref and ref.library and ref.library.filepath == blend_path:
-                if c.name in [cc.name for cc in bpy.context.scene.collection.children]:
+                if collection_in_scene(c):
                     return True
     return False
+
+def collection_in_scene(col, parent=None):
+    """Check if a collection is in the scene hierarchy (at any depth)."""
+    if parent is None:
+        parent = bpy.context.scene.collection
+
+    if col == parent:
+        return True
+
+    for child in parent.children:
+        if collection_in_scene(col, child):
+            return True
+
+    return False
+
+def walk_children(col, collected=None):
+    """Recursively gather all child collections of a given collection."""
+    if collected is None:
+        collected = set()
+    for child in col.children:
+        collected.add(child)
+        walk_children(child, collected)
+    return collected
 
 class VIEW3D_PT_publish_browser(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -207,9 +231,13 @@ class VIEW3D_PT_publish_browser(bpy.types.Panel):
         box = layout.box()
         col = box.column()
 
-        linked_collections = [
-            c for c in bpy.data.collections if is_collection_linked_and_not_overridden(c)
-        ]
+        linked_collections = [c for c in bpy.data.collections if is_collection_linked_and_not_overridden(c)]
+
+        # Remove subcollections of already-linked collections
+        excluded = set()
+        for c in linked_collections:
+            excluded.update(walk_children(c))
+        linked_collections = [c for c in linked_collections if c not in excluded]
 
         if linked_collections:
             for col_item in linked_collections:
@@ -225,9 +253,13 @@ class VIEW3D_PT_publish_browser(bpy.types.Panel):
         box = layout.box()
         col = box.column()
 
-        overridden_collections = [
-            c for c in bpy.data.collections if is_collection_override_of_published(c)
-        ]
+        overridden_collections = [c for c in bpy.data.collections if is_collection_override_of_published(c)]
+
+        # Remove subcollections of already-overridden collections
+        excluded = set()
+        for c in overridden_collections:
+            excluded.update(walk_children(c))
+        overridden_collections = [c for c in overridden_collections if c not in excluded]
 
         if overridden_collections:
             for col_item in overridden_collections:

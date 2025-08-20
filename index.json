@@ -7,7 +7,7 @@
       "id": "woody",
       "name": "Woody",
       "tagline": "A pipeline tool",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "type": "add-on",
       "maintainer": "ITB",
       "license": [
@@ -15,8 +15,8 @@
       ],
       "blender_version_min": "4.2.0",
       "archive_url": "./woody.zip",
-      "archive_size": 22980,
-      "archive_hash": "sha256:c612a80b0f241a26966d7de03e73694292035a98b660082ae6c2ced5ee809894"
+      "archive_size": 23854,
+      "archive_hash": "sha256:b32fe9300786a94f4b7c3f7f1d3036c98e2e37cb9476737e6992290f79747265"
     }
   ]
 }

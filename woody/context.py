@@ -8,10 +8,7 @@ def context_names():
      
     current_path = Path(bpy.data.filepath)
     directory = current_path.parent
-   
-
-    directory = str(directory)
-    directory = directory.split("\\")
+    directory = directory.parts
 
     if len(directory) < 4:
        print(f"[context_names] 🚨 Not enough directories in path: {directory}")

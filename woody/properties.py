@@ -1,27 +1,21 @@
-import os
-import re
-import uuid
-import shutil
-import subprocess
 import bpy
-import json
-from pathlib import Path
 
 from .folders import *
 
-def update_root(self, context):
-    self.group_folder = "NONE"
-    self.asset_folder = "NONE"
-    self.type_folder = "NONE"
-
-def update_group(self, context):
-    self.asset_folder = "NONE"
-    self.type_folder = "NONE"
-
-def update_asset(self, context):
-    self.type_folder = "NONE"
-
 class MyProperties(bpy.types.PropertyGroup):
+    
+    def update_root(self, context):
+        self.group_folder = "NONE"
+        self.asset_folder = "NONE"
+        self.type_folder = "NONE"
+
+    def update_group(self, context):
+        self.asset_folder = "NONE"
+        self.type_folder = "NONE"
+
+    def update_asset(self, context):
+        self.type_folder = "NONE"
+    
     root_folder: bpy.props.EnumProperty(
         name="Root",
         description="Choose a root folder",

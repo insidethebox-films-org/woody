@@ -12,6 +12,8 @@ from .utils import *
 from .folders import *
 from .blend_functions import *
 from .context import *
+# Add this line to the imports in folders.py
+from .profiler import addon_profiler, profile_section
 
 class PIPE_OT_create_project(bpy.types.Operator):
     # Creates a new project with the correct folder structure in the base project directory
@@ -238,19 +240,26 @@ class PIPE_OT_open_asset(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
     def execute(self, context):
-        scene = context.scene
-        my_props = scene.woody
+        addon_profiler.start_profiling()
+        try:
+            with profile_section("Getting scene properties"):
+                scene = context.scene
+                my_props = scene.woody
 
-        directory = get_directory()
-        blenderVersion = get_blender_version()
+                directory = get_directory()
+                blenderVersion = get_blender_version()
+            with profile_section("Building file paths"):
+                base_path = Path(bpy.path.abspath(directory)) / my_props.root_folder / my_props.group_folder / my_props.asset_folder / my_props.type_folder
+                config_path = Path(bpy.path.abspath(directory)) / my_props.root_folder / my_props.group_folder / my_props.asset_folder / "shot_config.json"
+                file_name = f"{my_props.asset_folder}_{my_props.type_folder}_latest.blend"
+                full_path = base_path / file_name
+            with profile_section("Opening blend file"):
+                open_blend(blender_exe=blenderVersion, blend_file_path=full_path, config_path=config_path)
 
-        base_path = Path(bpy.path.abspath(directory)) / my_props.root_folder / my_props.group_folder / my_props.asset_folder / my_props.type_folder
-        config_path = Path(bpy.path.abspath(directory)) / my_props.root_folder / my_props.group_folder / my_props.asset_folder / "shot_config.json"
-        file_name = f"{my_props.asset_folder}_{my_props.type_folder}_latest.blend"
-        full_path = base_path / file_name
-        open_blend(blender_exe=blenderVersion, blend_file_path=full_path, config_path=config_path)
-
-        return {"FINISHED"}
+            return {"FINISHED"}
+        finally:
+            # Stop profiling and show results
+            addon_profiler.stop_profiling(show_results=True, top_n=15)
 
     def draw(self, context):
         layout = self.layout
@@ -517,67 +526,73 @@ class PIPE_OT_open_publish(bpy.types.Operator):
     def execute(self, context):
         blend_path = Path(self.filepath).resolve()
         current_path = Path(bpy.data.filepath).resolve()
-
-        # Extract root/group/asset from both paths
+        
+        addon_profiler.start_profiling()
+        # Extract root/group/asset from both paths  
         try:
-            def extract_asset_path_parts(path):
-                path = Path(path)
-                filename = path.stem  # e.g. "lupinPub_model_published"
-                
-                # Assuming the format is always: asset_type_status
-                filename_parts = filename.split("_")
-                if len(filename_parts) < 3:
-                    raise ValueError(f"Unexpected filename format: {filename}")
-                
-                asset = filename_parts[0]
-                type_ = filename_parts[1]
-                
-                parts = path.parts
-                if len(parts) < 5:
-                    return None
-                group = parts[-4]
-                root = parts[-5]
-                
-                return root, group, asset, type_
+            with profile_section("Extract root/group/asset from both paths"):
+                try:
+                    def extract_asset_path_parts(path):
+                        path = Path(path)
+                        filename = path.stem  # e.g. "lupinPub_model_published"
+                        
+                        # Assuming the format is always: asset_type_status
+                        filename_parts = filename.split("_")
+                        if len(filename_parts) < 3:
+                            raise ValueError(f"Unexpected filename format: {filename}")
+                        
+                        asset = filename_parts[0]
+                        type_ = filename_parts[1]
+                        
+                        parts = path.parts
+                        if len(parts) < 5:
+                            return None
+                        group = parts[-4]
+                        root = parts[-5]
+                        
+                        return root, group, asset, type_
 
-            current_parts = extract_asset_path_parts(current_path)
-            target_parts = extract_asset_path_parts(blend_path)
+                    current_parts = extract_asset_path_parts(current_path)
+                    target_parts = extract_asset_path_parts(blend_path)
 
-            if current_parts and target_parts and current_parts == target_parts:
-                self.report({'ERROR'}, "❌ Cannot link from the same asset you're currently working in.")
-                return {'CANCELLED'}
+                    if current_parts and target_parts and current_parts == target_parts:
+                        self.report({'ERROR'}, "❌ Cannot link from the same asset you're currently working in.")
+                        return {'CANCELLED'}
 
-        except Exception as e:
-            self.report({'WARNING'}, f"⚠️ Asset path check failed: {e}")
-            # Allow linking if check fails
+                except Exception as e:
+                    self.report({'WARNING'}, f"⚠️ Asset path check failed: {e}")
+                    # Allow linking if check fails
 
-        if not blend_path.exists():
-            self.report({'ERROR'}, f"File not found: {blend_path}")
-            return {'CANCELLED'}
-
-          # Determine expected collection name
-        root, group, asset, type_ = extract_asset_path_parts(blend_path)
-        target_collection_name = f"{root}_{group}_{asset}_{type_}"
-        print("BLEND PATH: ",blend_path)
-        print("TARGET: ",target_collection_name)
-        try:
-            with bpy.data.libraries.load(str(blend_path), link=True) as (data_from, data_to):
-                if target_collection_name not in data_from.collections:
-                    self.report({'ERROR'}, f"Expected collection '{target_collection_name}' not found in .blend")
+                if not blend_path.exists():
+                    self.report({'ERROR'}, f"File not found: {blend_path}")
                     return {'CANCELLED'}
 
-                data_to.collections = [target_collection_name]
+            # Determine expected collection name
+            with profile_section("Determine expected collection names"):
+                root, group, asset, type_ = extract_asset_path_parts(blend_path)
+                target_collection_name = f"{root}_{group}_{asset}_{type_}"
+                print("BLEND PATH: ",blend_path)
+                print("TARGET: ",target_collection_name)
+                try:
+                    with bpy.data.libraries.load(str(blend_path), link=True) as (data_from, data_to):
+                        if target_collection_name not in data_from.collections:
+                            self.report({'ERROR'}, f"Expected collection '{target_collection_name}' not found in .blend")
+                            return {'CANCELLED'}
+
+                        data_to.collections = [target_collection_name]
 
 
-            linked_col = data_to.collections[0]
-            context.scene.collection.children.link(linked_col)
+                    linked_col = data_to.collections[0]
+                    context.scene.collection.children.link(linked_col)
 
-            self.report({'INFO'}, f"✅ Linked collection: {linked_col.name}")
-            return {'FINISHED'}
+                    self.report({'INFO'}, f"✅ Linked collection: {linked_col.name}")
+                    return {'FINISHED'}
 
-        except Exception as e:
-            self.report({'ERROR'}, f"Linking failed: {e}")
-            return {'CANCELLED'}
+                except Exception as e:
+                    self.report({'ERROR'}, f"Linking failed: {e}")
+                    return {'CANCELLED'}
+        finally:
+            addon_profiler.stop_profiling(show_results=True, top_n=15)
 
 class PIPE_OT_clear_enum(bpy.types.Operator):
     bl_idname = "pipe.clear_enum"
@@ -587,8 +602,13 @@ class PIPE_OT_clear_enum(bpy.types.Operator):
     prop_name: bpy.props.StringProperty()# type:ignore
 
     def execute(self, context):
-        setattr(context.scene.woody, self.prop_name, "NONE")
-        return {'FINISHED'}
+        addon_profiler.start_profiling()
+        try:
+            with profile_section("Clear Enum"):
+                setattr(context.scene.woody, self.prop_name, "NONE")
+                return {'FINISHED'}
+        finally:
+            addon_profiler.stop_profiling(show_results=True, top_n=15)
 
 def unlink_collection_from_scene(col, parent=None):
     """Recursively unlink a collection from the scene hierarchy if present."""
@@ -611,33 +631,38 @@ class PIPE_OT_override_collection(bpy.types.Operator):
 
     collection_name: bpy.props.StringProperty()# type:ignore
 
+    addon_profiler.start_profiling()
+
     def execute(self, context):
-        col = bpy.data.collections.get(self.collection_name)
-        if not col:
-            self.report({'ERROR'}, f"Collection '{self.collection_name}' not found.")
-            return {'CANCELLED'}
-
-        if col.override_library:
-            self.report({'INFO'}, f"Collection '{col.name}' is already overridden.")
-            return {'CANCELLED'}
-
         try:
-            override = col.override_hierarchy_create(
-                scene=context.scene,
-                view_layer=context.view_layer,
-                do_fully_editable=True
-            )
+            with profile_section("Checking there is a collection to unlink"):
+                col = bpy.data.collections.get(self.collection_name)
+                if not col:
+                    self.report({'ERROR'}, f"Collection '{self.collection_name}' not found.")
+                    return {'CANCELLED'}
 
-            # ✅ Unlink the original linked collection (works at any depth)
-            if unlink_collection_from_scene(col):
-                self.report({'INFO'}, f"Unlinked original linked collection: {col.name}")
-            else:
-                self.report({'WARNING'}, f"Could not unlink {col.name} (was not in scene hierarchy).")
+                if col.override_library:
+                    self.report({'INFO'}, f"Collection '{col.name}' is already overridden.")
+                    return {'CANCELLED'}
+            with profile_section("Unlinking the collection"):
+                try:
+                    override = col.override_hierarchy_create(
+                        scene=context.scene,
+                        view_layer=context.view_layer,
+                        do_fully_editable=True
+                    )
+                    # ✅ Unlink the original linked collection (works at any depth)
+                    if unlink_collection_from_scene(col):
+                        self.report({'INFO'}, f"Unlinked original linked collection: {col.name}")
+                    else:
+                        self.report({'WARNING'}, f"Could not unlink {col.name} (was not in scene hierarchy).")
 
-            self.report({'INFO'}, f"Full override created for: {override.name}")
-            return {'FINISHED'}
+                    self.report({'INFO'}, f"Full override created for: {override.name}")
+                    return {'FINISHED'}
 
-        except Exception as e:
-            self.report({'ERROR'}, f"Override failed: {e}")
-            return {'CANCELLED'}
+                except Exception as e:
+                    self.report({'ERROR'}, f"Override failed: {e}")
+                    return {'CANCELLED'}
+        finally:
+            addon_profiler.stop_profiling(show_results=True, top_n=15)
         

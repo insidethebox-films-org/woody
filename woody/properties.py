@@ -8,6 +8,8 @@ import json
 from pathlib import Path
 
 from .folders import *
+# Add this line to the imports in folders.py
+from .profiler import addon_profiler
 
 def update_root(self, context):
     self.group_folder = "NONE"

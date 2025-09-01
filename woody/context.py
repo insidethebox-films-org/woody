@@ -1,5 +1,6 @@
 import bpy
 from pathlib import Path
+# Add this line to the imports in folders.py
 
 def context_names():
     if not bpy.data.filepath:

@@ -9,6 +9,8 @@ from pathlib import Path
 
 from .context import *
 from .preferences import *
+# Add this line to the imports in folders.py
+from .profiler import addon_profiler, profile_section
 
 class VIEW3D_PT_context(bpy.types.Panel):
      
@@ -173,97 +175,104 @@ class VIEW3D_PT_publish_browser(bpy.types.Panel):
     bl_label = "Woody Asset Browser"
     bl_category = "WoodyAssetBrowser"
 
+    addon_profiler.start_profiling()
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
         props = scene.woody
 
-        def draw_enum_with_clear(layout, prop_id, label=""):
-            row = layout.row(align=True)
-            row.prop(props, prop_id, text=label)
-            op = row.operator("pipe.clear_enum", text="", icon="X")
-            op.prop_name = prop_id
+        try:
+            with profile_section("draw_enum_with_clear"):
+                def draw_enum_with_clear(layout, prop_id, label=""):
+                    row = layout.row(align=True)
+                    row.prop(props, prop_id, text=label)
+                    op = row.operator("pipe.clear_enum", text="", icon="X")
+                    op.prop_name = prop_id
 
-        draw_enum_with_clear(layout, "root_folder", "Root")
-        draw_enum_with_clear(layout, "group_folder", "Group")
-        draw_enum_with_clear(layout, "asset_folder", "Asset")
+                draw_enum_with_clear(layout, "root_folder", "Root")
+                draw_enum_with_clear(layout, "group_folder", "Group")
+                draw_enum_with_clear(layout, "asset_folder", "Asset")
 
-        layout.separator()
-        layout.label(text="Published Files:")
+            layout.separator()
+            layout.label(text="Published Files:")
 
-        box = layout.box()
-        col = box.column()
-        col.scale_y = 0.95
+            box = layout.box()
+            col = box.column()
+            col.scale_y = 0.95
+            with profile_section("Get Publishes"):
+                base_path = Path(bpy.path.abspath(get_directory()))
+                if props.root_folder and props.root_folder != "NONE":
+                    base_path /= props.root_folder
+                    if props.group_folder and props.group_folder != "NONE":
+                        base_path /= props.group_folder
+                        if props.asset_folder and props.asset_folder != "NONE":
+                            base_path /= props.asset_folder
+                if not base_path.exists():
+                    layout.label(text="Invalid path.", icon="ERROR")
+                    return
 
-        base_path = Path(bpy.path.abspath(get_directory()))
-        if props.root_folder and props.root_folder != "NONE":
-            base_path /= props.root_folder
-            if props.group_folder and props.group_folder != "NONE":
-                base_path /= props.group_folder
-                if props.asset_folder and props.asset_folder != "NONE":
-                    base_path /= props.asset_folder
-        if not base_path.exists():
-            layout.label(text="Invalid path.", icon="ERROR")
-            return
+                blend_files = list(base_path.rglob("*_published.blend"))
 
-        blend_files = list(base_path.rglob("*_published.blend"))
+                if blend_files:
+                    for blend_file in blend_files:
+                        row = col.row(align=True)
+                        row.label(text=blend_file.name, icon="FILE_BLEND")
 
-        if blend_files:
-            for blend_file in blend_files:
-                row = col.row(align=True)
-                row.label(text=blend_file.name, icon="FILE_BLEND")
+                        # Get the relative blend path to match against linked/overridden collections
+                        blend_path_str = str(blend_file)
 
-                # Get the relative blend path to match against linked/overridden collections
-                blend_path_str = str(blend_file)
-
-                # Check if already linked or overridden
-                if not is_published_file_already_in_scene(blend_path_str):
-                    op = row.operator("pipe.open_publish", text="", icon="IMPORT")
-                    op.filepath = blend_path_str
+                        # Check if already linked or overridden
+                        if not is_published_file_already_in_scene(blend_path_str):
+                            op = row.operator("pipe.open_publish", text="", icon="IMPORT")
+                            op.filepath = blend_path_str
+                        else:
+                            row.label(icon="CHECKMARK")
                 else:
-                    row.label(icon="CHECKMARK")
-        else:
-            layout.label(text="No published files found.", icon="INFO")
+                    layout.label(text="No published files found.", icon="INFO")
 
 
-        layout.separator()
-        layout.label(text="Linked Published Collections:")
-        box = layout.box()
-        col = box.column()
+            layout.separator()
+            layout.label(text="Linked Published Collections:")
+            box = layout.box()
+            col = box.column()
+            with profile_section("Linked collections"):
+                linked_collections = [c for c in bpy.data.collections if is_collection_linked_and_not_overridden(c)]
 
-        linked_collections = [c for c in bpy.data.collections if is_collection_linked_and_not_overridden(c)]
+                # Remove subcollections of already-linked collections
+                excluded = set()
+                for c in linked_collections:
+                    excluded.update(walk_children(c))
+                linked_collections = [c for c in linked_collections if c not in excluded]
 
-        # Remove subcollections of already-linked collections
-        excluded = set()
-        for c in linked_collections:
-            excluded.update(walk_children(c))
-        linked_collections = [c for c in linked_collections if c not in excluded]
+                if linked_collections:
+                    for col_item in linked_collections:
+                        row = col.row(align=True)
+                        row.label(text=col_item.name, icon="OUTLINER_COLLECTION")
+                        op = row.operator("pipe.override_collection", text="", icon="IMPORT")
+                        op.collection_name = col_item.name
+                else:
+                    col.label(text="No linked published collections.")
 
-        if linked_collections:
-            for col_item in linked_collections:
-                row = col.row(align=True)
-                row.label(text=col_item.name, icon="OUTLINER_COLLECTION")
-                op = row.operator("pipe.override_collection", text="", icon="IMPORT")
-                op.collection_name = col_item.name
-        else:
-            col.label(text="No linked published collections.")
+            layout.separator()
+            layout.label(text="Overridden Published Collections:")
+            box = layout.box()
+            col = box.column()
+            with profile_section("Overridden links"):
+                overridden_collections = [c for c in bpy.data.collections if is_collection_override_of_published(c)]
 
-        layout.separator()
-        layout.label(text="Overridden Published Collections:")
-        box = layout.box()
-        col = box.column()
+                # Remove subcollections of already-overridden collections
+                excluded = set()
+                for c in overridden_collections:
+                    excluded.update(walk_children(c))
+                overridden_collections = [c for c in overridden_collections if c not in excluded]
 
-        overridden_collections = [c for c in bpy.data.collections if is_collection_override_of_published(c)]
-
-        # Remove subcollections of already-overridden collections
-        excluded = set()
-        for c in overridden_collections:
-            excluded.update(walk_children(c))
-        overridden_collections = [c for c in overridden_collections if c not in excluded]
-
-        if overridden_collections:
-            for col_item in overridden_collections:
-                row = col.row(align=True)
-                row.label(text=col_item.name, icon="LIBRARY_DATA_OVERRIDE")
-        else:
-            col.label(text="No overridden published collections.")
+                if overridden_collections:
+                    for col_item in overridden_collections:
+                        row = col.row(align=True)
+                        row.label(text=col_item.name, icon="LIBRARY_DATA_OVERRIDE")
+                else:
+                    col.label(text="No overridden published collections.")
+        finally:
+            addon_profiler.stop_profiling(show_results=True, top_n=15)
+        

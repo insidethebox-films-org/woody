@@ -8,6 +8,8 @@ import json
 from pathlib import Path
 from .context import *
 from .utils import *
+# Add this line to the imports in folders.py
+from .profiler import addon_profiler
 
 def new_blend(blender_exe, new_file_name, collection_name, config_path):
 

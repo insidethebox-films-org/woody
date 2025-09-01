@@ -11,6 +11,8 @@ from pathlib import Path
 
 from .preferences import *
 from .context import *
+# Add this line to the imports in folders.py
+from .profiler import addon_profiler
 
 def create_blend_with_collection(file_name, collection_name, target_directory): 
     from pathlib import Path

@@ -1,4 +1,6 @@
 import bpy
+# Add this line to the imports in folders.py
+from .profiler import addon_profiler
 
 _addon_key_cache = None
 

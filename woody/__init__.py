@@ -7,7 +7,6 @@ bl_info = {
     "description": "A pipeline tool",
     "category": "Development",
 }
-
 import bpy
 from .properties import MyProperties
 from .preferences import Preferences_Properties
@@ -22,6 +21,7 @@ from .operators import (
 from .panels import (
     VIEW3D_PT_context, VIEW3D_PT_assets_shots, VIEW3D_PT_settings, VIEW3D_PT_publish_browser
 )
+
 class preferences_panel(Preferences_Properties, bpy.types.AddonPreferences):
     bl_idname = __package__ 
 

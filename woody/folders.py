@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from .preferences import *
+from .profiler import addon_profiler
 
 _json_cache = None
 
@@ -55,6 +56,7 @@ def create_shot_config_file(config_path: Path, config_data: dict):
 
 def load_json_data(context):
     global _json_cache
+
     if _json_cache is None:
         print("================= Loading new JSON data... =================")
         

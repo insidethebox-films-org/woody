@@ -1,4 +1,4 @@
-from ...utils import *
+from .generate_config_script import generate_config_script
 
 import subprocess
 from pathlib import Path

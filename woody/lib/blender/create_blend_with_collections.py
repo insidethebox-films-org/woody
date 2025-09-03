@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 from ...preferences import *
-from ...context import *
+from ...utils.context import *
 
 def create_blend_with_collection(file_name, collection_name, target_directory): 
 

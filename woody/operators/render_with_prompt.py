@@ -1,4 +1,5 @@
-from ..utils import *
+from ..utils.context import context_names
+from ..lib.blender.set_render_output_to_cg import set_render_output_to_cg
 
 import subprocess
 import bpy

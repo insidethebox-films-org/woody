@@ -1,6 +1,6 @@
 import bpy
 
-from .folders import *
+from .lib.json import *
 
 class MyProperties(bpy.types.PropertyGroup):
     

@@ -1,4 +1,5 @@
-from ..utils import *
+from ..preferences import get_directory
+from ..lib.blender.set_render_output_to_cg import set_render_output_to_cg
 
 import bpy
 

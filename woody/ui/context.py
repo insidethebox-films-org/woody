@@ -1,4 +1,4 @@
-from ..context import *
+from ..utils.context import context_names
 
 import bpy
 

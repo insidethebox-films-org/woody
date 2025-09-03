@@ -1,4 +1,4 @@
-from ..utils import *
+from ..utils.context import context_names
 
 import bpy
 import json

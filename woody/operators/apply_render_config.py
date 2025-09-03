@@ -1,4 +1,4 @@
-from ..preferences import *
+from ..lib.blender.get_preferences import get_directory
 from ..lib.blender.apply_render_config import apply_render_config
 
 import os

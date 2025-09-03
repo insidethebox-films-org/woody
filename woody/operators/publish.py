@@ -1,4 +1,4 @@
-from ..preferences import get_directory
+from ..lib.blender.get_preferences import get_directory
 from ..utils.context import context_names
 from ..lib.blender.create_blend_with_collections import create_blend_with_collection
 from ..lib.blender.show_popup_message import show_popup_message

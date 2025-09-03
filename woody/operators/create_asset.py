@@ -1,4 +1,4 @@
-from ..preferences import get_directory, get_blender_version
+from ..lib.blender.get_preferences import get_directory, get_blender_version
 from ..lib.blender.save_current_scene import *
 from ..lib.blender.new_blend import *
 from ..lib.json.load_save_json_data import save_structure_to_json, load_json_data

@@ -1,4 +1,4 @@
-from ..preferences import get_directory
+from ..lib.blender.get_preferences import get_directory
 from ..lib.json import *
 from ..lib.folders.create_folders_subfolders import create_folders_subfolders
 

@@ -1,4 +1,4 @@
-from ..preferences import *
+from ..lib.blender.get_preferences import *
 
 import bpy
 from pathlib import Path

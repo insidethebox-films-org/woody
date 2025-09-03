@@ -1,6 +1,6 @@
-import bpy
-
 from .lib.json import *
+
+import bpy
 
 class MyProperties(bpy.types.PropertyGroup):
     

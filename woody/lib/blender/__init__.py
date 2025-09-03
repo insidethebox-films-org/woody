@@ -8,6 +8,7 @@ from .show_popup_message import show_popup_message
 from .apply_render_config import apply_render_config
 from .generate_config_script import generate_config_script
 from .set_render_output_to_cg import set_render_output_to_cg
+from .get_preferences import get_preferences, get_directory, get_blender_version
 
 __all__ = [
     'incremental_save',
@@ -19,5 +20,8 @@ __all__ = [
     'show_popup_message',
     'apply_render_config',
     'generate_config_script',
-    'set_render_output_to_cg'
+    'set_render_output_to_cg',
+    'get_preferences',
+    'get_directory',
+    'get_blender_version'
 ]

@@ -1,4 +1,4 @@
-from ...preferences import *
+from ..blender.get_preferences import *
 from ..folders import get_folder_structure
 
 import bpy

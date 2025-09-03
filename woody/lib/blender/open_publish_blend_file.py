@@ -1,4 +1,4 @@
-from ...preferences import *
+from .get_preferences import *
 
 import os
 import subprocess

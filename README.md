@@ -31,7 +31,7 @@ poetry --version
 
 ### Step 3: Install Woody
 
-**Option A: Using Poetry (Recommended)**
+**Option A: Using Poetry**
 
 ```bash
 # Clone the repository
@@ -42,10 +42,7 @@ cd woody
 poetry install
 
 # Activate the virtual environment
-poetry shell
-
-# Verify installation
-woody --help
+poetry run woody
 ```
 
 **Option B: Using Pip**

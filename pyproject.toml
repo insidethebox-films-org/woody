@@ -1,0 +1,22 @@
+[project]
+name = "woody"
+version = "0.1.0"
+description = "A pipeline tool"
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pymongo (==4.15.1)",
+    "customtkinter (==5.2.2)",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+woody = "woody.main:main"

@@ -4,6 +4,7 @@ __pycache__/
 
 # Ignore VS Code settings
 .vscode/
+.VSCodeCounter/
 
 # Ignore zip files like woody.zip
 
@@ -16,3 +17,8 @@ Thumbs.db
 
 # Ignore Preferences
 prefs/
+tests/
+
+#Ignore personal hips
+hip_files/
+backup/

@@ -7,6 +7,7 @@ from ..objects.project import Project
 from ..objects.asset import Asset
 from ..objects.shot import Shot
 from ..objects.scene import Scene
+from woody.dcc.blender.blender import Blender
 
 class Processor:
     guard = Guard()
@@ -68,7 +69,7 @@ class Processor:
         asset = Asset()
         return asset.update(data)
     
-    # ------- Scene ------- #
+    # ------- Shot ------- #
     
     @handle_woody_errors
     def create_shot(self, group, shot_name, start_frame=None, end_frame=None):
@@ -91,3 +92,20 @@ class Processor:
         )
         
         return scene.create(), context.set_context()
+    
+    # ------- Blender ------- #
+    
+    @handle_woody_errors
+    def install_blender(self, exe, force_update=None):
+        blender = Blender()
+        return blender.install(exe, force_update)
+    
+    @handle_woody_errors
+    def uninstall_blender(self):
+        blender = Blender()
+        return blender.uninstall()
+    
+    def launch_blender(self):
+        blender = Blender()
+        return blender.launch()
+    

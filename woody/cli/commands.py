@@ -6,6 +6,9 @@ from .cmds.context import set_context, switch_projects
 from .cmds.queries import list
 from .cmds.create import create
 from .cmds.update import update
+from .cmds.install import install
+from .cmds.uninstall import uninstall
+from .cmds.launch import launch
 
 import shlex
 
@@ -19,7 +22,10 @@ class CommandRegistry:
             "switch": self.switch_projects,
             "create": self.create,
             "update": self.update,
-            "setup": self.setup 
+            "setup": self.setup,
+            "install": self.install,
+            "uninstall": self.uninstall,
+            "launch": self.launch
         }
         self.running = True
         
@@ -36,7 +42,7 @@ class CommandRegistry:
     
     @handle_woody_errors
     def execute(self, cmd_line):
-        parts = shlex.split(cmd_line)
+        parts = shlex.split(cmd_line, posix=False)
         if not parts:
             return
         
@@ -98,3 +104,19 @@ class CommandRegistry:
     def update(self, args):
         """Update metadata: -p '{"key":"value"}' | -a '{"key":"value"}'"""
         return update(self, args)
+    
+    #==== DCC Commands ====#
+    
+    def install(self, args):
+        """Install Woody into DCC's based on flags: -blender 'exe_path'"""
+        return install(self, args)
+    
+    def uninstall(self, args):
+        """Uninstall Woody from DCC's based on flags: -blender 'exe_path'"""
+        return uninstall(self, args)
+    
+    def launch(self, args):
+        "Launch DCC: -blender"
+        return launch(self, args)
+    
+    

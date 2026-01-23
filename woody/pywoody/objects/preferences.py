@@ -19,14 +19,14 @@ class Preferences():
     def db(self):
         return get_db()
     
-    def check_prefs(self):
+    def check(self):
         if os.path.exists(self.prefs_path):
             prefs = self.io.load()
             self.guard.set_preferences(prefs)
             return True
         return False
         
-    def create_prefs(self, user: str, projects_path: str, mongodb_address: str):
+    def create(self, user: str, projects_path: str, mongodb_address: str):
         self.prefs_path.parent.mkdir(parents=True, exist_ok=True)
         
         prefs = {
@@ -39,7 +39,15 @@ class Preferences():
         
         self.io.save(prefs)
         
-    def load_prefs(self):
+    def update(self, **kwargs):
+        self.io.update(kwargs)
+        
+        updated_prefs = self.io.load()
+        self.guard.set_preferences(updated_prefs)
+        
+        woody_logger.log(SUCCESS_LEVEL, "Preferences updated")
+    
+    def load(self):
         prefs = self.io.load()
         return prefs
     

@@ -5,7 +5,8 @@ def help(self, args):
     categories = {
         "Base Commands": ["help", "exit"],
         "Project Management": ["list", "switch", "create", "update"],
-        "Navigation & Context": ["context"]
+        "Navigation & Context": ["context"],
+        "DCC": ["install", "launch"]
     }
 
     output = [

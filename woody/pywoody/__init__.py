@@ -12,9 +12,9 @@ class Woody:
         self.cli = CLI()
         
     def run(self):
-        if self.preferences.check_prefs():
+        if self.preferences.check():
             
-            prefs = self.preferences.load_prefs()
+            prefs = self.preferences.load()
             
             current_project = prefs.get("current_project")
             if current_project is not None:

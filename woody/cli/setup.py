@@ -44,7 +44,7 @@ class SetupConfig:
     
     def save_preferences(self):
         prefs = Preferences()
-        prefs.create_prefs(self.user_name, self.projects_directory, self.mongodb_address)
+        prefs.create(self.user_name, self.projects_directory, self.mongodb_address)
 
 
 class SetupCLI:

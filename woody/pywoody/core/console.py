@@ -45,20 +45,17 @@ def quiet(func):
     """Decorator to suppress all prints and logs during function execution"""
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # Save original logging level
+        
         original_level = woody_logger.level
         
-        # Disable all logging
         logging.disable(logging.CRITICAL)
         
-        # Redirect stdout and stderr to devnull
         with open(os.devnull, 'w') as devnull:
             with redirect_stdout(devnull), redirect_stderr(devnull):
                 try:
                     result = func(*args, **kwargs)
                     return result
                 finally:
-                    # Restore logging
                     logging.disable(logging.NOTSET)
                     woody_logger.setLevel(original_level)
     
@@ -71,7 +68,7 @@ def format_msg(label, message, level="info"):
         "error": RED, 
         "warning": ORANGE, 
         "woody": WOODY, 
-        "info": RESET
+        "info": WOODY
     }
     color = levels.get(level.lower(), RESET)
     return f"{color}[{label}]{RESET} {message}"

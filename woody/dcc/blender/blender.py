@@ -44,6 +44,7 @@ class Blender():
         
     def launch(self):
         if self.exe:
-            subprocess.run([str(self.exe)])
+            startup_script = Path(__file__).parent / "startup.py"
+            subprocess.run([str(self.exe), "--python", str(startup_script)])
         else:
             raise WoodyError("Blender executable not set. Run install first.", "error")

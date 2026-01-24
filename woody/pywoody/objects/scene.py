@@ -51,7 +51,9 @@ class Scene():
                     self.group: {
                         self.asset_name: {
                             self.dcc: {
-                                self.guard._preferences.get("user"): {}
+                                self.guard._preferences.get("user"): {
+                                    self.product_name: {}
+                                }
                             }
                         }
                     }    

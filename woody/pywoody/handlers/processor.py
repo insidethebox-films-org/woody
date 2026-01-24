@@ -7,6 +7,7 @@ from ..objects.project import Project
 from ..objects.asset import Asset
 from ..objects.shot import Shot
 from ..objects.scene import Scene
+from ..objects.publish import Publish
 from woody.dcc.blender.blender import Blender
 
 class Processor:
@@ -92,6 +93,12 @@ class Processor:
         )
         
         return scene.create(), context.set_context()
+
+    @handle_woody_errors
+    def create_publish(self, publish_name, publish_type):  
+        publish = Publish(publish_name, publish_type)
+
+        return publish.create()
     
     # ------- Blender ------- #
     

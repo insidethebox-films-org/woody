@@ -6,8 +6,9 @@ import argparse
 def create(self, args):
     """Create new projects or assets using flags"""
     parser = argparse.ArgumentParser(prog='create', exit_on_error=False)
-    parser.add_argument('-p', '--project', type=str, metavar='NAME')
     parser.add_argument('-a', '--asset', nargs=2, metavar=('GROUP', 'NAME'))
+    parser.add_argument('-pr', '--project', type=str, metavar='NAME')
+    parser.add_argument('-p', '--publish', nargs=2, metavar=('NAME', 'TYPE'))
     parser.add_argument('-s', '--shot', nargs=4, metavar=('GROUP', 'NAME', 'START', 'END'))
     parser.add_argument('-sc', '--scene', nargs=2, metavar=('NAME', 'DCC'))
     
@@ -35,6 +36,10 @@ def create(self, args):
         scene_name, dcc = parsed.scene
         Processor().create_scene(scene_name, dcc)
     
+    elif parsed.publish:
+        publish_name, publish_type = parsed.publish
+        Processor().create_publish(publish_name, publish_type)
+    
     else:
-        raise WoodyError("No valid flags provided. Use -p/--project or -a/--asset")
+        raise WoodyError("No valid flags provided. Use -pr/--project, -a/--asset, or -p/--publish")
     

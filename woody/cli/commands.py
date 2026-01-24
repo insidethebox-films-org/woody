@@ -15,17 +15,17 @@ import shlex
 class CommandRegistry:
     def __init__(self):
         self.commands = {
-            "help": self.help,
-            "exit": self.exit,
-            "list": self.list,
             "context": self.set_context,
-            "switch": self.switch_projects,
             "create": self.create,
-            "update": self.update,
-            "setup": self.setup,
+            "exit": self.exit,
+            "help": self.help,
             "install": self.install,
+            "launch": self.launch,
+            "list": self.list,
+            "setup": self.setup,
+            "switch": self.switch_projects,
             "uninstall": self.uninstall,
-            "launch": self.launch
+            "update": self.update
         }
         self.running = True
         

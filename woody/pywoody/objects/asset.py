@@ -11,8 +11,8 @@ class Asset():
         
         self.project_name = self.guard._current_project
         self.tree = "assets"
-        self.group = group or self.guard._context[1]
-        self.asset_name = asset_name or self.guard._context[2]
+        self.group = group or self.guard._context.get("group")
+        self.asset_name = asset_name or self.guard._context.get("asset")
         
         self.woody_id = WoodyID().create(
             self.project_name, 

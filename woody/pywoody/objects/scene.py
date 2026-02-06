@@ -15,12 +15,12 @@ class Scene():
         self.collection = "scenes"
         
         self.project_name = self.guard._current_project
-        self.tree = self.guard._context[0]
-        self.group = self.guard._context[1]
-        self.asset_name = self.guard._context[2]
+        self.tree = self.guard._context.get("tree")
+        self.group = self.guard._context.get("group")
+        self.asset_name = self.guard._context.get("asset")
         
         self.product_type = "scenes"
-        self.product_name = scene_name or self.guard._context[4]
+        self.product_name = scene_name or self.guard._context.get("product_name")
         
         self.dcc = dcc
         

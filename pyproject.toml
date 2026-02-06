@@ -7,9 +7,10 @@ authors = [
 ]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.15"
 dependencies = [
     "pymongo (==4.15.1)",
+    "pyside6 (>=6.10.1,<7.0.0)",
 ]
 
 

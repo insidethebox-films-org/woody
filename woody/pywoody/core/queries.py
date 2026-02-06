@@ -20,7 +20,7 @@ class Queries():
         msg = f"Available Projects:\n{project_list}"
         woody_logger.log(SUCCESS_LEVEL, msg)
         
-        return sorted(projects)
+        return sorted_projects
         
     def list_groups(self, tree):
         if not self.db or not self.guard._current_project:

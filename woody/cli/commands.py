@@ -2,6 +2,7 @@ from woody.pywoody.core.console import WoodyError, format_msg, handle_woody_erro
 
 from .setup import SetupCLI
 from .cmds.core import help, exit
+from .cmds.ui import launch_ui
 from .cmds.context import set_context, switch_projects
 from .cmds.queries import list
 from .cmds.create import create
@@ -24,6 +25,7 @@ class CommandRegistry:
             "list": self.list,
             "setup": self.setup,
             "switch": self.switch_projects,
+            "ui": self.ui,
             "uninstall": self.uninstall,
             "update": self.update
         }
@@ -80,6 +82,12 @@ class CommandRegistry:
         setup_cli = SetupCLI()
         setup_cli.run()
         return None
+    
+    #==== UI Commands ====#
+    
+    def ui(self, args):
+        """Launch UI"""
+        return launch_ui(self, args)
     
     #==== list Commands ====#
     

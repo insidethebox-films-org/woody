@@ -62,7 +62,7 @@ class Preferences():
         project = {"current_project": project_name}
         self.io.update(project)
         self.guard.set_current_project(project_name)
-        self.guard.set_context(None)
+        self.guard.clear_context()
         
         msg = f"Switched to project: {project_name}"
         woody_logger.log(SUCCESS_LEVEL, msg)

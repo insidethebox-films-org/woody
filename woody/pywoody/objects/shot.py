@@ -11,8 +11,8 @@ class Shot():
         
         self.project_name = self.guard._current_project
         self.tree = "shots"
-        self.group = group or self.guard._context[1]
-        self.shot_name = shot_name or self.guard._context[2]
+        self.group = group or self.guard._context.get("group")
+        self.shot_name = shot_name or self.guard._context.get("asset")
         
         self.woody_id = WoodyID().create(
             self.project_name, 

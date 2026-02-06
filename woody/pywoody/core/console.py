@@ -73,25 +73,30 @@ def format_msg(label, message, level="info"):
     color = levels.get(level.lower(), RESET)
     return f"{color}[{label}]{RESET} {message}"
 
-def get_prompt(project_name, context):
+def get_prompt(project_name, context_dict):
     project = project_name or "none"
     
-    if context == None:
+    if not context_dict or not any(context_dict.values()):
         return f"{WOODY}[woody]{RESET}{PROJECT}[{project}]{RESET} > "
     
-    tree = context[0]
-    group = context[1]
-    asset = context[2]
+    context_parts = []
+    for level in ["tree", "group", "asset"]:
+        if context_dict.get(level):
+            context_parts.append(context_dict[level])
+        else:
+            break 
     
-    product_type = context[3]
-    product_name = context[4]
-
-    if product_type == None:
-        return f"{WOODY}[woody]{RESET}{PROJECT}[{project}]{RESET}[{tree}/{group}/{asset}] > "
+    product_parts = []
+    if context_dict.get("product_type") and context_dict.get("product_name"):
+        product_parts = [context_dict["product_type"], context_dict["product_name"]]
+    
+    if context_parts and product_parts:
+        return f"{WOODY}[woody]{RESET}{PROJECT}[{project}]{RESET}[{'/'.join(context_parts)}]{PRODUCT}[{'/'.join(product_parts)}]{RESET} > "
+    elif context_parts:
+        return f"{WOODY}[woody]{RESET}{PROJECT}[{project}]{RESET}[{'/'.join(context_parts)}] > "
     else:
-        return f"{WOODY}[woody]{RESET}{PROJECT}[{project}]{RESET}[{tree}/{group}/{asset}]{PRODUCT}[{product_type}/{product_name}]{RESET} > "
-
-# --- Logging  --- 
+        return f"{WOODY}[woody]{RESET}{PROJECT}[{project}]{RESET} > "
+    
 class WoodyConsoleHandler(logging.Handler):
     def emit(self, record):
         msg = record.getMessage()

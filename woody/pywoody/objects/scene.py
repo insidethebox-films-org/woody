@@ -61,10 +61,12 @@ class Scene():
             }
         }
         
-        return self.entity.create(data, folder_structure)
+        directory = self.entity.create(data, folder_structure)
+       
+        return directory
 
     def update(self, data: dict):
-        return self.entity.update({"woody_id": self.woody_id}, data)
+        return self.entity.update(data)
     
     def archive(self):
         return self.entity.archive()

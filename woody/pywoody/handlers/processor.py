@@ -1,4 +1,4 @@
-from ..core.console import handle_woody_errors
+from ..core.console import handle_woody_errors, WoodyError
 from ..core.queries import Queries
 from ..objects.preferences import Preferences
 from ..objects.guard import Guard
@@ -90,9 +90,22 @@ class Processor:
             self.guard._context[2],
             "scenes",
             scene_name
-        )
+        ) 
         
-        return scene.create(), context.set_context()
+        if dcc == "blender":
+            cur_dcc = Blender() 
+        else:
+            raise WoodyError(f"DCC '{dcc}' is not supported yet.")
+        
+    
+        directory = scene.create()
+        context.set_context() 
+        file_path = cur_dcc.create(directory, "01")
+        
+        data = {"versions": {"1": str(file_path)}}
+        scene.update(data)
+
+        return
 
     @handle_woody_errors
     def create_publish(self, publish_name, publish_type):  

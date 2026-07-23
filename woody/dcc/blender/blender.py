@@ -1,7 +1,7 @@
 from woody.pywoody.objects.dcc import DCC
 from woody.pywoody.objects.preferences import Preferences
 from woody.pywoody.objects.guard import Guard
-from woody.pywoody.core.console import WoodyError
+from woody.pywoody.core.console import WoodyError, woody_logger, SUCCESS_LEVEL
 
 from pathlib import Path
 import subprocess
@@ -13,6 +13,7 @@ class Blender():
         self.prefs = Preferences()
         self.dcc = DCC("Blender")
         self.exe = self.guard._preferences.get("blender_exe") or None
+        self.suffix = ".blend"
 
     def _find_python_path(self, exe_path):
         exe_file = Path(exe_path)
@@ -47,3 +48,24 @@ class Blender():
             subprocess.run([str(self.exe)])
         else:
             raise WoodyError("Blender executable not set. Run install first.", "error")
+        
+    def create(self, directory, version):
+        scene_name = f"{self.guard._context[4]}_v{version}{self.suffix}"
+        file_path = directory / scene_name
+       
+        if self.exe:
+            try:
+                cmd = (
+                f'"{self.exe}" --background '
+                f'--python-expr "import bpy; bpy.ops.wm.save_as_mainfile(filepath=r\'{file_path}\')"'
+                )
+                subprocess.run(cmd, shell=True, check=True)
+
+                msg = f"Created Blend scene at: {file_path}"
+                woody_logger.log(SUCCESS_LEVEL, msg)
+            except subprocess.CalledProcessError as e:
+                raise WoodyError(f"Failed to create blend file: {e}", "error")  
+        else:
+            raise WoodyError("Unable to create scene. Blender executable not set.", "error")
+
+        return file_path

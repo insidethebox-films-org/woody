@@ -46,12 +46,12 @@ class Entity():
         
         self._execute(self.db.save_one(merged_data), "Creation")
         
-        Directory().create(folder_structure)
+        directory = Directory().create(folder_structure)
 
         msg = f"{self.entity_type} '{self.name}' created successfully"
         woody_logger.log(SUCCESS_LEVEL, msg)
         
-        return msg
+        return directory
     
     def update(self, data: dict):
         query = {"woody_id": self.woody_id}
